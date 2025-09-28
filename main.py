@@ -1,9 +1,11 @@
 import sys
+import re
+import os
 import pandas as pd
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTableView, QVBoxLayout, QWidget,
     QFileDialog, QMessageBox, QHBoxLayout, QHeaderView,
-    QMenu, QTabWidget
+    QMenu, QTabWidget, QInputDialog, QDialog, QHBoxLayout, QListWidget, QLabel, QPushButton, QListWidgetItem
 )
 from PyQt6.QtCore import QAbstractTableModel, Qt, QModelIndex
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
@@ -46,7 +48,6 @@ class SpreadsheetModel(QAbstractTableModel):
         row, col = index.row(), index.column()
         old_value = str(self.df.iat[row, col])
 
-        # Save to undo stack
         self.undo_stack.append(('edit', row, col, old_value, value))
         self.redo_stack.clear()
 
@@ -70,7 +71,6 @@ class SpreadsheetModel(QAbstractTableModel):
         return None
 
     def insertRow(self, row):
-        """Insert a row at the specified position with appropriate defaults"""
         if self.df.empty:
             if self.df.columns.empty:
                 if self.is_test_scenario:
@@ -91,17 +91,14 @@ class SpreadsheetModel(QAbstractTableModel):
         if row < 0 or row > len(self.df):
             return False
 
-        # Create new row with appropriate defaults
         new_row = {col: "" for col in self.df.columns}
 
         if self.is_test_scenario:
-            # TestScenario defaults
-            new_row["A"] = "TC"
-            # Don't set ID here - let the update function handle it
-        else:
-            # Objects defaults - XPATH in By-Type column (index 2)
             if len(self.df.columns) > 2:
-                new_row[self.df.columns[2]] = "XPATH"  # By-Type column
+                new_row[self.df.columns[0]] = "TC"
+        else:
+            if len(self.df.columns) > 2:
+                new_row[self.df.columns[2]] = "XPATH"
 
         self.beginInsertRows(QModelIndex(), row, row)
         if row == 0:
@@ -114,22 +111,18 @@ class SpreadsheetModel(QAbstractTableModel):
             self.df = pd.concat([top_part, pd.DataFrame([new_row]), bottom_part], ignore_index=True)
         self.endInsertRows()
 
-        # Save to undo stack
         self.undo_stack.append(('insert', row, pd.Series(new_row)))
         self.redo_stack.clear()
 
-        # Auto-update IDs only for TestScenario tab
         if self.is_test_scenario:
             self._updateID()
 
         return True
 
     def deleteRow(self, row):
-        """Delete a row at the specified position"""
         if self.df.empty or row < 0 or row >= len(self.df):
             return False
 
-        # Save to undo stack
         deleted_row = self.df.iloc[row].copy()
         self.undo_stack.append(('delete', row, deleted_row))
         self.redo_stack.clear()
@@ -145,41 +138,52 @@ class SpreadsheetModel(QAbstractTableModel):
     def _updateID(self):
         if not self.is_test_scenario or self.df.empty or len(self.df.columns) < 2:
             return
-        type_col = self.df.columns[0]
-        id_col = self.df.columns[1]
+
         tc_rows = []
+        pattern = r"^TC-([A-Z]+)_AUT(\d+)$"
+
+        # Collect all TC rows and parse their IDs
         for i in range(len(self.df)):
             current_type = str(self.df.iat[i, 0])
             current_id = str(self.df.iat[i, 1])
+
             if current_type == "TC":
-                if current_id.startswith("TC-UN_AUT"):
-                    try:
-                        tc_num = int(current_id[9:])
-                        tc_rows.append((i, tc_num, current_id))
-                    except ValueError:
-                        tc_rows.append((i, -1, current_id))
+                match = re.match(pattern, current_id)
+                if match:
+                    module_abbr = match.group(1)
+                    tc_num = int(match.group(2))
+                    tc_rows.append((i, tc_num, current_id, module_abbr))
                 else:
-                    tc_rows.append((i, -1, current_id))
+                    tc_rows.append((i, -1, current_id, None))
 
         if not tc_rows:
             return
+
+        # Find the module abbreviation to use
+        module_abbr = "UM"
+        for _, _, _, abbr in tc_rows:
+            if abbr is not None:
+                module_abbr = abbr
+                break
+
+        # Sort by row index to maintain order
         tc_rows.sort(key=lambda x: x[0])
-        current_numbers = [num for _, num, _ in tc_rows if num != -1]
 
-        if current_numbers:
-            max_num = max(current_numbers)
-            next_available = max_num + 1
-        else:
-            next_available = 101
-        current_number = 101
         changed_rows = []
+        current_number = 1  # Always start from 1
 
-        for row_idx, current_num, current_id in tc_rows:
-            new_id = f"TC-UM_AUT{current_number}"
-            if current_num != current_number or current_num == -1:
+        # Update all TC rows with sequential numbering
+        for row_idx, current_num, current_id, _ in tc_rows:
+            new_id = f"TC-{module_abbr}_AUT{current_number}"
+
+            # Update if the ID has changed
+            if current_id != new_id:
                 self.df.iat[row_idx, 1] = new_id
                 changed_rows.append(row_idx)
+
             current_number += 1
+
+        # Emit data changed signals
         if changed_rows:
             for row_idx in changed_rows:
                 id_index = self.index(row_idx, 1)
@@ -276,6 +280,11 @@ class SpreadsheetEditor(QMainWindow):
         self.setWindowTitle("Test Case Spreadsheet Editor")
         self.resize(1400, 800)
 
+        self.current_module_name = None
+        self.current_module_abbr = None
+        self.current_scenario_path = None
+        self.current_obj_path = None
+
         # Create tab widget
         self.tab_widget = QTabWidget()
 
@@ -304,20 +313,6 @@ class SpreadsheetEditor(QMainWindow):
 
         # Set central widget
         self.setCentralWidget(self.tab_widget)
-
-        # Create shortcuts
-        self.createShortcuts()
-
-    def createShortcuts(self):
-        """Create keyboard shortcuts"""
-        self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self)
-        self.save_shortcut.activated.connect(self.saveFile)
-
-        self.undo_shortcut = QShortcut(QKeySequence("Ctrl+Z"), self)
-        self.undo_shortcut.activated.connect(self.undo)
-
-        self.redo_shortcut = QShortcut(QKeySequence("Ctrl+Y"), self)
-        self.redo_shortcut.activated.connect(self.redo)
 
     def setupTab1(self):
         """Setup TestScenario tab"""
@@ -361,9 +356,9 @@ class SpreadsheetEditor(QMainWindow):
         new_file_action.triggered.connect(self.newFile)
         file_menu.addAction(new_file_action)
 
-        load_preset_action = QAction("LoadPreset", self)
-        load_preset_action.triggered.connect(self.loadPreset)
-        file_menu.addAction(load_preset_action)
+        create_preset_action = QAction("CreatePreset", self)
+        create_preset_action.triggered.connect(self.createPreset)
+        file_menu.addAction(create_preset_action)
 
         load_file_action = QAction("LoadFile", self)
         load_file_action.triggered.connect(self.loadFile)
@@ -372,6 +367,10 @@ class SpreadsheetEditor(QMainWindow):
         save_file_action = QAction("SaveFile", self)
         save_file_action.triggered.connect(self.saveFile)
         file_menu.addAction(save_file_action)
+
+        save_preset_as_action = QAction("SaveFileAs", self)
+        save_preset_as_action.triggered.connect(self.saveFileAs)
+        file_menu.addAction(save_preset_as_action)
 
         edit_menu = menubar.addMenu("Edit")
 
@@ -442,18 +441,18 @@ class SpreadsheetEditor(QMainWindow):
         target_row = current_index.row()
         model.deleteRow(target_row)
 
-    def createTestScenarioPreset(self):
+    def createTestScenarioPreset(self, module_name, module_abbr):
         columns = [str(i) for i in range(12)]
-
+        abbr = module_abbr.upper()[:2]
         data = [
             ["Type", "ID", "Skip", "Description", "Steps Performed", "Expected Results", "Command", "Data1", "Data2", "Data3", "Data4", "Data5"],
-            ["UCB", "Graphs", "", "SynOption Graphs Test Scripts", "", "", "", "", "", "", "", ""],
-            ["TC", "TC-UM_AUT101", "", "SynOption Test Scripts", "Launch Application And Login", "A successful login should happen.", "StartAppWithLogin", "e2etest", "Synergy1!", "6SDLAUWYJWZUYWT6OEFEMHDPOYJLNPY7", "", ""],
-            ["TC", "TC-UM_AUT102", "", "", "Scenario Started", "", "StartScenario", "", "", "", "", ""],
-            ["TC", "TC-UM_AUT103", "", "", "", "", "", "", "", "", "", ""],
-            ["TC", "TC-UM_AUT104", "", "", "Scenario Ended", "", "EndScenario", "", "", "", "", ""],
-            ["TC", "TC-UM_AUT105", "", "SynOption Test Scripts", "Close Application", "", "StopApp", "", "", "", "", ""],
-            ["UCF", "Graphs", "", "SynOption Graphs Test Results", "", "", "", "", "", "", "", ""],
+            ["UCB", module_name, "", f"SynOption {module_name} Test Scripts", "", "", "", "", "", "", "", ""],
+            ["TC", f"TC-{abbr}_AUT1", "", "SynOption Test Scripts", "Launch Application And Login", "A successful login should happen.", "StartAppWithLogin", "e2etest", "Synergy1!", "6SDLAUWYJWZUYWT6OEFEMHDPOYJLNPY7", "", ""],
+            ["TC", f"TC-{abbr}_AUT2", "", "", "Scenario Started", "", "StartScenario", "", "", "", "", ""],
+            ["TC", f"TC-{abbr}_AUT3", "", "", "", "", "", "", "", "", "", ""],
+            ["TC", f"TC-{abbr}_AUT4", "", "", "Scenario Ended", "", "EndScenario", "", "", "", "", ""],
+            ["TC", f"TC-{abbr}_AUT5", "", "SynOption Test Scripts", "Close Application", "", "StopApp", "", "", "", "", ""],
+            ["UCF", module_name, "", f"SynOption {module_name} Test Results", "", "", "", "", "", "", "", ""],
             ["END", "", "", "", "", "", "", "", "", "", "", ""]
         ]
 
@@ -485,17 +484,44 @@ class SpreadsheetEditor(QMainWindow):
         self.setColumnWidths(self.table1, self.model1)
         self.setColumnWidths(self.table2, self.model2)
 
-    def loadPreset(self):
+    def createPreset(self):
         if not self.model1.df.empty or not self.model2.df.empty:
             reply = QMessageBox.question(
-                self, "Load Preset",
+                self, "Create Preset",
                 "This will replace current data. Continue?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
             if reply == QMessageBox.StandardButton.No:
                 return
 
-        test_scenario_df = self.createTestScenarioPreset()
+        # Prompt for module name
+        module_name, ok = QInputDialog.getText(
+            self, "Module Name", "Enter module name (e.g., QuickSanity):"
+        )
+
+        if not ok or not module_name.strip():
+            return
+
+        module_name = module_name.strip()
+
+        # Prompt for module abbreviation
+        module_abbr, ok = QInputDialog.getText(
+            self, "Module Abbreviation",
+            f"Enter 2-letter abbreviation for {module_name} (e.g., QS):",
+            text=module_name[:2].upper()
+        )
+
+        if not ok or not module_abbr.strip():
+            return
+
+        module_abbr = module_abbr.strip().upper()[:2]
+
+        # Store module info for later use
+        self.current_module_name = module_name
+        self.current_module_abbr = module_abbr
+
+        # Create presets with module name
+        test_scenario_df = self.createTestScenarioPreset(module_name, module_abbr)
         self.model1.loadData(test_scenario_df)
 
         objects_df = self.createObjectsPreset()
@@ -504,44 +530,92 @@ class SpreadsheetEditor(QMainWindow):
         self.setColumnWidths(self.table1, self.model1)
         self.setColumnWidths(self.table2, self.model2)
 
-    def loadFile(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, "Open TestScenario Excel File", "", "Excel Files (*.xlsx)"
+        QMessageBox.information(
+            self, "Preset Created",
+            f"Preset created for module: {module_name}\n\n"
+            f"When saving for the first time, use 'Save Preset As' to create files:\n"
+            f"• Automation_Module_{module_name}.xlsx\n"
+            f"• ObjRep_Module_{module_name}_Test.xlsx"
         )
-        if not path:
+
+    def saveFileAs(self):
+        if self.model1.df.empty and self.model2.df.empty:
+            QMessageBox.warning(self, "Empty Sheets", "No data to save")
             return
 
-        try:
-            test_scenario_df = pd.read_excel(path, sheet_name="TestScenario")
-            objects_df = pd.read_excel(path, sheet_name="Objects")
+        dialog = CustomFileDialog(self, mode="save")
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            scenario_path, obj_path = dialog.getSelectedFiles()
 
-            self.model1.loadData(test_scenario_df)
-            self.model2.loadData(objects_df)
+            if scenario_path and obj_path:
+                try:
+                    # Create directories if they don't exist
+                    os.makedirs(os.path.dirname(scenario_path), exist_ok=True)
+                    os.makedirs(os.path.dirname(obj_path), exist_ok=True)
 
-            self.setColumnWidths(self.table1, self.model1)
-            self.setColumnWidths(self.table2, self.model2)
+                    with pd.ExcelWriter(scenario_path, engine='openpyxl') as writer:
+                        if not self.model1.df.empty:
+                            self.model1.df.to_excel(writer, sheet_name='TestScenario', index=False)
 
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to load file:\n{str(e)}")
+                    with pd.ExcelWriter(obj_path, engine='openpyxl') as writer:
+                        if not self.model2.df.empty:
+                            self.model2.df.to_excel(writer, sheet_name='Objects', index=False)
+
+                    # Store current paths for future saves
+                    self.current_scenario_path = scenario_path
+                    self.current_obj_path = obj_path
+
+                    QMessageBox.information(self, "Success", "Files saved successfully!")
+
+                except Exception as e:
+                    QMessageBox.critical(self, "Error", f"Failed to save files:\n{str(e)}")
+
+    def loadFile(self):
+        dialog = CustomFileDialog(self, mode="open")
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            scenario_path, obj_path = dialog.getSelectedFiles()
+
+            if scenario_path and obj_path:
+                try:
+                    test_scenario_df = pd.read_excel(scenario_path, sheet_name="TestScenario")
+                    objects_df = pd.read_excel(obj_path, sheet_name="Objects")
+
+                    self.model1.loadData(test_scenario_df)
+                    self.model2.loadData(objects_df)
+
+                    self.setColumnWidths(self.table1, self.model1)
+                    self.setColumnWidths(self.table2, self.model2)
+
+                    # Store current paths for saving
+                    self.current_scenario_path = scenario_path
+                    self.current_obj_path = obj_path
+
+                except Exception as e:
+                    QMessageBox.critical(self, "Error", f"Failed to load files:\n{str(e)}")
 
     def saveFile(self):
         if self.model1.df.empty and self.model2.df.empty:
             QMessageBox.warning(self, "Empty Sheets", "No data to save")
             return
 
-        path, _ = QFileDialog.getSaveFileName(
-            self, "Save Excel File", "test_cases.xlsx", "Excel Files (*.xlsx)"
-        )
-        if path:
+        # If we already have paths (from loading), use them
+        if hasattr(self, 'current_scenario_path') and hasattr(self, 'current_obj_path'):
             try:
-                with pd.ExcelWriter(path, engine='openpyxl') as writer:
+                with pd.ExcelWriter(self.current_scenario_path, engine='openpyxl') as writer:
                     if not self.model1.df.empty:
                         self.model1.df.to_excel(writer, sheet_name='TestScenario', index=False)
+
+                with pd.ExcelWriter(self.current_obj_path, engine='openpyxl') as writer:
                     if not self.model2.df.empty:
                         self.model2.df.to_excel(writer, sheet_name='Objects', index=False)
 
+                QMessageBox.information(self, "Success", "Files saved successfully!")
+
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save file:\n{str(e)}")
+                QMessageBox.critical(self, "Error", f"Failed to save files:\n{str(e)}")
+        else:
+            # Use custom dialog for new saves
+            self.saveFileAs()
 
     def undo(self):
         current_tab_index = self.tab_widget.currentIndex()
@@ -556,6 +630,172 @@ class SpreadsheetEditor(QMainWindow):
             self.model1.redo()
         else:
             self.model2.redo()
+
+class CustomFileDialog(QDialog):
+    def __init__(self, parent=None, mode="open"):
+        super().__init__(parent)
+        self.mode = mode
+        self.selected_module = None
+        self.setWindowTitle("Select Module and Files" if mode == "open" else "Save Module Files")
+        self.setModal(True)
+        self.resize(600, 400)
+
+        self.setupUI()
+
+    def setupUI(self):
+        layout = QVBoxLayout()
+
+        # Data directory selection
+        dir_layout = QHBoxLayout()
+        dir_layout.addWidget(QLabel("Data Directory:"))
+        self.dir_label = QLabel("Not selected")
+        dir_layout.addWidget(self.dir_label)
+        self.select_dir_btn = QPushButton("Select Directory")
+        self.select_dir_btn.clicked.connect(self.selectDataDirectory)
+        dir_layout.addWidget(self.select_dir_btn)
+        layout.addLayout(dir_layout)
+
+        # Module selection
+        layout.addWidget(QLabel("Select Module:"))
+        self.module_list = QListWidget()
+        self.module_list.itemSelectionChanged.connect(self.onModuleSelected)
+        layout.addWidget(self.module_list)
+
+        # File selection
+        file_layout = QHBoxLayout()
+
+        # Test Scenario files
+        scenario_layout = QVBoxLayout()
+        scenario_layout.addWidget(QLabel("Test Scenario Files:"))
+        self.scenario_list = QListWidget()
+        scenario_layout.addWidget(self.scenario_list)
+        file_layout.addLayout(scenario_layout)
+
+        # Object Repository files
+        obj_layout = QVBoxLayout()
+        obj_layout.addWidget(QLabel("Object Repository Files:"))
+        self.obj_list = QListWidget()
+        obj_layout.addWidget(self.obj_list)
+        file_layout.addLayout(obj_layout)
+
+        layout.addLayout(file_layout)
+
+        # Buttons
+        button_layout = QHBoxLayout()
+        if self.mode == "open":
+            self.open_btn = QPushButton("Open Files")
+            self.open_btn.clicked.connect(self.accept)
+            self.open_btn.setEnabled(False)
+            button_layout.addWidget(self.open_btn)
+        else:
+            self.save_btn = QPushButton("Save Files")
+            self.save_btn.clicked.connect(self.accept)
+            button_layout.addWidget(self.save_btn)
+
+        self.cancel_btn = QPushButton("Cancel")
+        self.cancel_btn.clicked.connect(self.reject)
+        button_layout.addWidget(self.cancel_btn)
+
+        layout.addLayout(button_layout)
+        self.setLayout(layout)
+
+    def selectDataDirectory(self):
+        directory = QFileDialog.getExistingDirectory(self, "Select Data Directory")
+        if directory:
+            self.data_directory = directory
+            self.dir_label.setText(directory)
+            self.populateModules()
+
+    def populateModules(self):
+        self.module_list.clear()
+        self.scenario_list.clear()
+        self.obj_list.clear()
+
+        # Look for testSuites and objectRepositories directories
+        test_suites_path = os.path.join(self.data_directory, "testSuites")
+        obj_repos_path = os.path.join(self.data_directory, "objectRepositories")
+
+        if not os.path.exists(test_suites_path) or not os.path.exists(obj_repos_path):
+            QMessageBox.warning(self, "Error", "Required directories not found in selected data directory")
+            return
+
+        # Get all module directories (qaoptimus, qatitan, etc.)
+        modules = set()
+
+        if os.path.exists(test_suites_path):
+            for item in os.listdir(test_suites_path):
+                if os.path.isdir(os.path.join(test_suites_path, item)):
+                    modules.add(item)
+
+        if os.path.exists(obj_repos_path):
+            for item in os.listdir(obj_repos_path):
+                if os.path.isdir(os.path.join(obj_repos_path, item)):
+                    modules.add(item)
+
+        if not modules:
+            QMessageBox.information(self, "No Modules", "No modules found in the selected directory")
+            return
+
+        for module in sorted(modules):
+            self.module_list.addItem(module)
+
+    def onModuleSelected(self):
+        self.scenario_list.clear()
+        self.obj_list.clear()
+
+        if not self.module_list.selectedItems():
+            return
+
+        self.selected_module = self.module_list.selectedItems()[0].text()
+
+        # Populate test scenario files
+        test_suites_path = os.path.join(self.data_directory, "testSuites", self.selected_module)
+        if os.path.exists(test_suites_path):
+            for file in os.listdir(test_suites_path):
+                if file.endswith('.xlsx'):
+                    # Remove "Automation_Module_" prefix and ".xlsx" suffix for display
+                    display_name = file.replace('Automation_Module_', '').replace('.xlsx', '')
+                    item = QListWidgetItem(display_name)
+                    item.file_path = os.path.join(test_suites_path, file)
+                    self.scenario_list.addItem(item)
+
+        # Populate object repository files
+        obj_repos_path = os.path.join(self.data_directory, "objectRepositories", self.selected_module)
+        if os.path.exists(obj_repos_path):
+            for file in os.listdir(obj_repos_path):
+                if file.endswith('.xlsx'):
+                    # Remove "ObjRep_Module_" prefix and "_Test.xlsx" suffix for display
+                    display_name = file.replace('ObjRep_Module_', '').replace('_Test.xlsx', '')
+                    item = QListWidgetItem(display_name)
+                    item.file_path = os.path.join(obj_repos_path, file)
+                    self.obj_list.addItem(item)
+
+        # Enable open button if we have files to open
+        if self.mode == "open":
+            has_scenario_files = self.scenario_list.count() > 0
+            has_obj_files = self.obj_list.count() > 0
+            self.open_btn.setEnabled(has_scenario_files and has_obj_files)
+
+    def getSelectedFiles(self):
+        if not hasattr(self, 'data_directory') or not self.selected_module:
+            return None, None
+
+        scenario_file = None
+        obj_file = None
+
+        if self.scenario_list.selectedItems():
+            scenario_file = self.scenario_list.selectedItems()[0].file_path
+        elif self.mode == "save":  # For save, we can create new files
+            scenario_file = os.path.join(self.data_directory, "testSuites", self.selected_module,
+                                       f"Automation_Module_{self.selected_module}.xlsx")
+
+        if self.obj_list.selectedItems():
+            obj_file = self.obj_list.selectedItems()[0].file_path
+        elif self.mode == "save":  # For save, we can create new files
+            obj_file = os.path.join(self.data_directory, "objectRepositories", self.selected_module,
+                                  f"ObjRep_Module_{self.selected_module}_Test.xlsx")
+
+        return scenario_file, obj_file
 
 
 if __name__ == "__main__":
