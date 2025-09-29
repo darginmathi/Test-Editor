@@ -31,44 +31,33 @@ class SpreadsheetEditor(QMainWindow):
         self.current_obj_path = None
         self.data_directory = None
 
-        # Create status bar
         self.setupStatusBar()
 
-        # Create tab widget
         self.tab_widget = QTabWidget()
 
-        # Create two tabs
         self.tab1 = QWidget()
         self.tab2 = QWidget()
 
-        # Setup tabs
         self.setupTab1()
         self.setupTab2()
 
-        # Add tabs to widget
         self.tab_widget.addTab(self.tab1, "TestScenario")
         self.tab_widget.addTab(self.tab2, "Objects")
 
-        # Create models for both tabs with appropriate types
         self.model1 = SpreadsheetModel(is_test_scenario=True)  # TestScenario
         self.model2 = SpreadsheetModel(is_test_scenario=False) # Objects
 
-        # Create autocomplete delegates
         self.autocomplete_delegate1 = AutocompleteDelegate()
         self.autocomplete_delegate2 = AutocompleteDelegate()
 
-        # Setup tables
         self.setupTable1()
         self.setupTable2()
 
-        # Create top menu
         self.createTopMenu()
 
-        # Set central widget
         self.setCentralWidget(self.tab_widget)
 
     def setupStatusBar(self):
-        """Setup status bar with permanent message area"""
         status_bar = QStatusBar()
         self.setStatusBar(status_bar)
 

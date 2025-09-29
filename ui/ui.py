@@ -17,7 +17,6 @@ class CustomFileDialog(QDialog):
         self.setWindowTitle("Select Module and Files" if mode == "open" else "Save Module Files")
         self.setModal(True)
         self.resize(900, 600)
-
         self.setFont(QFont("Arial", 12))
         self.setupUI()
         self.loadLastDirectory()

@@ -1,11 +1,19 @@
 import re
 import pandas as pd
+import numpy as np
 from PyQt6.QtCore import QAbstractTableModel, Qt, QModelIndex
 from PyQt6.QtGui import QColor
 from typing import List
 from command_manager import command_manager
 
 class SpreadsheetModel(QAbstractTableModel):
+    #constants
+    TYPE_COL = 0
+    ID_COL = 1
+    COMMAND_COL = 6
+    DATA1_COL = 7
+    XPATH_COL = 2
+
     def __init__(self, df: pd.DataFrame = None, is_test_scenario=True):
         super().__init__()
         self.is_test_scenario = is_test_scenario
@@ -16,7 +24,6 @@ class SpreadsheetModel(QAbstractTableModel):
         else:
             self.df = df.copy()
 
-        # Update command manager with object names if this is Objects model
         if not self.is_test_scenario and not self.df.empty:
             command_manager.update_object_names(self.df)
 
@@ -32,20 +39,11 @@ class SpreadsheetModel(QAbstractTableModel):
 
         row, col = index.row(), index.column()
 
-        if role == Qt.ItemDataRole.BackgroundRole:
-            # Color code autocomplete cells
-            if self.is_test_scenario and col in [6, 7]:  # Command and Data1 columns
-                if row < len(self.df):
-                    row_type = str(self.df.iat[row, 0]) if len(self.df.columns) > 0 else ""
-                    if row_type == "TC":
-                        return QColor(240, 248, 255)  # Light blue background
-
         if role in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.EditRole):
             value = self.df.iat[row, col]
             if pd.isna(value):
                 return ""
             return str(value)
-
         return None
 
     def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
@@ -66,7 +64,6 @@ class SpreadsheetModel(QAbstractTableModel):
     def flags(self, index):
         if not index.isValid() or self.df.empty:
             return Qt.ItemFlag.NoItemFlags
-
         return Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEditable
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
@@ -77,81 +74,25 @@ class SpreadsheetModel(QAbstractTableModel):
                 return str(section + 1)
         return None
 
-    def get_autocomplete_options(self, index: QModelIndex, search_text: str = "") -> List[str]:
-        """Get autocomplete options for specific cells"""
-        if self.df.empty or not index.isValid():
-            return []
-
-        row, col = index.row(), index.column()
-
-        # For Test Scenario - Command column (column 6)
-        if self.is_test_scenario and col == 6:  # Command column
-            if row < len(self.df) and len(self.df.columns) > 0:
-                current_type = str(self.df.iat[row, 0])
-                if current_type == "TC":
-                    return command_manager.search_commands(search_text)
-
-        # For Test Scenario - Data1 column (column 7) - Object names from Objects file
-        elif self.is_test_scenario and col == 7:  # Data1 column
-            if row < len(self.df) and len(self.df.columns) > 0:
-                current_type = str(self.df.iat[row, 0])
-                if current_type == "TC":
-                    return command_manager.search_objects(search_text)
-
-        return []
-
-    def is_autocomplete_cell(self, index: QModelIndex) -> bool:
-        """Check if a cell should have autocomplete"""
-        if self.df.empty or not index.isValid():
-            return False
-
-        row, col = index.row(), index.column()
-
-        if self.is_test_scenario and col in [6, 7]:  # Command and Data1 columns
-            if row < len(self.df) and len(self.df.columns) > 0:
-                current_type = str(self.df.iat[row, 0])
-                return current_type == "TC"
-
-        return False
     def insertRow(self, row):
-        if self.df.empty:
-            if self.df.columns.empty:
-                if self.is_test_scenario:
-                    columns = ["Type", "ID", "Skip", "Description", "Steps Performed",
-                              "Expected Results", "Command", "Data1", "Data2", "Data3"]
-                else:
-                    columns = ["Type", "User friendly name of Object", "By-Type", "Webdriver friendly name of Object"]
-                self.df = pd.DataFrame(columns=columns)
-
-            self.beginInsertRows(QModelIndex(), 0, 0)
-            self.df.loc[0] = [""] * len(self.df.columns)
-            self.endInsertRows()
-
-            self.undo_stack.append(('insert', 0, self.df.iloc[0].copy()))
-            self.redo_stack.clear()
-            return True
-
         if row < 0 or row > len(self.df):
             return False
-
         new_row = {col: "" for col in self.df.columns}
-
         if self.is_test_scenario:
             if len(self.df.columns) > 2:
-                new_row[self.df.columns[0]] = "TC"
+                new_row[self.df.columns[self.TYPE_COL]] = "TC"
         else:
             if len(self.df.columns) > 2:
-                new_row[self.df.columns[2]] = "XPATH"
+                new_row[self.df.columns[self.XPATH_COL]] = "XPATH"
 
         self.beginInsertRows(QModelIndex(), row, row)
-        if row == 0:
-            self.df = pd.concat([pd.DataFrame([new_row]), self.df], ignore_index=True)
+        if self.df.empty:
+            self.df = pd.DataFrame([new_row])
         elif row == len(self.df):
-            self.df = pd.concat([self.df, pd.DataFrame([new_row])], ignore_index=True)
+            self.df = pd.concat([self.df, pd.Dataframe([new_row])], ignore_index=True)
         else:
-            top_part = self.df.iloc[:row]
-            bottom_part = self.df.iloc[row:]
-            self.df = pd.concat([top_part, pd.DataFrame([new_row]), bottom_part], ignore_index=True)
+            new_values = np.insert(self.df.values, row, list(new_row.values()), axis=0)
+            self.df = pd.DataFrame(new_values, columns=self.df.columns)
         self.endInsertRows()
 
         self.undo_stack.append(('insert', row, pd.Series(new_row)))
@@ -171,15 +112,17 @@ class SpreadsheetModel(QAbstractTableModel):
         self.redo_stack.clear()
 
         self.beginRemoveRows(QModelIndex(), row, row)
-        self.df = self.df.drop(self.df.index[row]).reset_index(drop=True)
+        self.df.drop(self.df.index[row], inplace=True)
+        self.df.reset_index(drop=True, inplace=True)
         self.endRemoveRows()
+
         if self.is_test_scenario:
             self._updateID()
 
         return True
 
     def _updateID(self):
-        if not self.is_test_scenario or self.df.empty or len(self.df.columns) < 2:
+        if not self.is_test_scenario or self.df.empty or len(self.df.columns) <= self.ID_COL:
             return
 
         tc_rows = []
@@ -187,8 +130,8 @@ class SpreadsheetModel(QAbstractTableModel):
 
         # Collect all TC rows and parse their IDs
         for i in range(len(self.df)):
-            current_type = str(self.df.iat[i, 0])
-            current_id = str(self.df.iat[i, 1])
+            current_type = str(self.df.iat[i, self.TYPE_COL])
+            current_id = str(self.df.iat[i, self.ID_COL])
 
             if current_type == "TC":
                 match = re.match(pattern, current_id)
@@ -305,7 +248,6 @@ class SpreadsheetModel(QAbstractTableModel):
         return True
 
     def loadData(self, df):
-        """Load new data into the model"""
         self.beginResetModel()
         self.df = df.copy() if not df.empty else pd.DataFrame()
         self.undo_stack.clear()

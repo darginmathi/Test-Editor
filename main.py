@@ -8,7 +8,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     app.setApplicationName("Test Case Editor")
-    app.setApplicationVersion("1.0")
+    app.setApplicationVersion("0.1")
 
     editor = SpreadsheetEditor()
     editor.show()
