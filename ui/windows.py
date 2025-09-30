@@ -9,9 +9,8 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QModelIndex, QTimer
 from PyQt6.QtGui import QAction
 
-from models import SpreadsheetModel
+from models.models import SpreadsheetModel
 from ui import CustomFileDialog
-from autocomplete_delegate import AutocompleteDelegate
 from command_manager import command_manager
 
 
@@ -46,9 +45,6 @@ class SpreadsheetEditor(QMainWindow):
 
         self.model1 = SpreadsheetModel(is_test_scenario=True)  # TestScenario
         self.model2 = SpreadsheetModel(is_test_scenario=False) # Objects
-
-        self.autocomplete_delegate1 = AutocompleteDelegate()
-        self.autocomplete_delegate2 = AutocompleteDelegate()
 
         self.setupTable1()
         self.setupTable2()
@@ -102,11 +98,6 @@ class SpreadsheetEditor(QMainWindow):
     def setupTable1(self):
         """Configure table1 appearance with auto-adjusting columns and rows"""
         self.table1.setModel(self.model1)
-        self.autocomplete_delegate1.setModel(self.model1)
-
-        # Set delegates for specific columns
-        self.table1.setItemDelegateForColumn(6, self.autocomplete_delegate1)  # Command column
-        self.table1.setItemDelegateForColumn(7, self.autocomplete_delegate1)  # Data1 column
 
         # Configure header for auto-adjustment
         header = self.table1.horizontalHeader()

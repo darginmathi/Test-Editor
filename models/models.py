@@ -53,13 +53,15 @@ class SpreadsheetModel(QAbstractTableModel):
         row, col = index.row(), index.column()
         old_value = str(self.df.iat[row, col])
 
-        self.undo_stack.append(('edit', row, col, old_value, value))
-        self.redo_stack.clear()
+        if str(value) != old_value:
+            self.undo_stack.append(('edit', row, col, old_value))
+            self.redo_stack.clear()
 
-        self.df.iat[row, col] = value
-        self.dataChanged.emit(index, index)
+            self.df.iat[row, col] = value
+            self.dataChanged.emit(index, index)
 
-        return True
+            return True
+        return False
 
     def flags(self, index):
         if not index.isValid() or self.df.empty:
@@ -78,24 +80,23 @@ class SpreadsheetModel(QAbstractTableModel):
         if row < 0 or row > len(self.df):
             return False
         new_row = {col: "" for col in self.df.columns}
-        if self.is_test_scenario:
-            if len(self.df.columns) > 2:
+        if self.is_test_scenario and len(self.df.columns) > self.TYPE_COL:
                 new_row[self.df.columns[self.TYPE_COL]] = "TC"
         else:
-            if len(self.df.columns) > 2:
+            if len(self.df.columns) > self.XPATH_COL:
                 new_row[self.df.columns[self.XPATH_COL]] = "XPATH"
 
         self.beginInsertRows(QModelIndex(), row, row)
         if self.df.empty:
             self.df = pd.DataFrame([new_row])
         elif row == len(self.df):
-            self.df = pd.concat([self.df, pd.Dataframe([new_row])], ignore_index=True)
+            self.df = pd.concat([self.df, pd.DataFrame([new_row])], ignore_index=True)
         else:
             new_values = np.insert(self.df.values, row, list(new_row.values()), axis=0)
             self.df = pd.DataFrame(new_values, columns=self.df.columns)
         self.endInsertRows()
 
-        self.undo_stack.append(('insert', row, pd.Series(new_row)))
+        self.undo_stack.append(('insert', row))
         self.redo_stack.clear()
 
         if self.is_test_scenario:
@@ -182,15 +183,15 @@ class SpreadsheetModel(QAbstractTableModel):
         action_type = action[0]
 
         if action_type == 'edit':
-            row, col, old_value, new_value = action[1], action[2], action[3], action[4]
+            row, col, old_value = action[1], action[2], action[3]
             current_value = str(self.df.iat[row, col])
             self.df.iat[row, col] = old_value
-            self.redo_stack.append(('edit', row, col, current_value, old_value))
+            self.redo_stack.append(('edit', row, col, current_value))
             index = self.index(row, col)
             self.dataChanged.emit(index, index)
 
         elif action_type == 'insert':
-            row, inserted_data = action[1], action[2]
+            row = action[1]
             deleted_row = self.df.iloc[row].copy()
             self.beginRemoveRows(QModelIndex(), row, row)
             self.df = self.df.drop(self.df.index[row]).reset_index(drop=True)
@@ -211,7 +212,6 @@ class SpreadsheetModel(QAbstractTableModel):
         return True
 
     def redo(self):
-        """Redo last undone action"""
         if not self.redo_stack:
             return False
 
@@ -219,10 +219,10 @@ class SpreadsheetModel(QAbstractTableModel):
         action_type = action[0]
 
         if action_type == 'edit':
-            row, col, old_value, new_value = action[1], action[2], action[3], action[4]
+            row, col, new_value = action[1], action[2], action[3]
             current_value = str(self.df.iat[row, col])
             self.df.iat[row, col] = new_value
-            self.undo_stack.append(('edit', row, col, current_value, new_value))
+            self.undo_stack.append(('edit', row, col, current_value, ))
             index = self.index(row, col)
             self.dataChanged.emit(index, index)
 
@@ -234,14 +234,13 @@ class SpreadsheetModel(QAbstractTableModel):
             self.undo_stack.append(('delete', row, inserted_data))
 
         elif action_type == 'delete':
-            row, deleted_data = action[1], action[2]
+            row  = action[1]
             deleted_row = self.df.iloc[row].copy()
             self.beginRemoveRows(QModelIndex(), row, row)
             self.df = self.df.drop(self.df.index[row]).reset_index(drop=True)
             self.endRemoveRows()
             self.undo_stack.append(('insert', row, deleted_row))
 
-        # Update IDs after redo for TestScenario
         if self.is_test_scenario:
             self._updateID()
 
