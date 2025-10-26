@@ -1,0 +1,176 @@
+{
+    "presets": {
+        "scenario": {
+            "columns": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11"
+            ],
+            "data": [
+                [
+                    "Type",
+                    "ID",
+                    "Skip",
+                    "Description",
+                    "Steps Performed",
+                    "Expected Results",
+                    "Command",
+                    "Data1",
+                    "Data2",
+                    "Data3",
+                    "Data4",
+                    "Data5"
+                ],
+                [
+                    "UCB",
+                    "{module_name}",
+                    "",
+                    "SynOption {module_name} Test Scripts",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "TC",
+                    "TC-{module_abbr}_AUT1",
+                    "",
+                    "SynOption Test Scripts",
+                    "Launch Application And Login",
+                    "A successful login should happen.",
+                    "StartAppWithLogin",
+                    "e2etest",
+                    "Synergy1!",
+                    "6SDLAUWYJWZUYWT6OEFEMHDPOYJLNPY7",
+                    "",
+                    ""
+                ],
+                [
+                    "TC",
+                    "TC-{module_abbr}_AUT2",
+                    "",
+                    "",
+                    "Scenario Started",
+                    "",
+                    "StartScenario",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "TC",
+                    "TC-{module_abbr}_AUT3",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "TC",
+                    "TC-{module_abbr}_AUT4",
+                    "",
+                    "",
+                    "Scenario Ended",
+                    "",
+                    "EndScenario",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "TC",
+                    "TC-{module_abbr}_AUT5",
+                    "",
+                    "SynOption Test Scripts",
+                    "Close Application",
+                    "",
+                    "StopApp",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "UCF",
+                    "{module_name}",
+                    "",
+                    "SynOption {module_name} Test Results",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "END",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ]
+        },
+        "object_repo": {
+            "columns": [
+                "0",
+                "1",
+                "2",
+                "3"
+            ],
+            "data": [
+                [
+                    "Type",
+                    "User friendly name of Object",
+                    "By-Type",
+                    "Webdriver friendly name of Object"
+                ],
+                [
+                    "Link",
+                    "lnkAdmin",
+                    "XPATH",
+                    "//*[@id=\"page-admin\"]"
+                ],
+                [
+                    "END",
+                    "",
+                    "",
+                    ""
+                ]
+            ]
+        }
+    }
+}

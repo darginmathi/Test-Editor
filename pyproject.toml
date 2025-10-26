@@ -1,0 +1,13 @@
+[project]
+name = "testeditor"
+version = "0.1.0"
+description = "A custom testcase editor for e2eautomation"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "openpyxl>=3.1.5",
+    "pandas>=2.3.3",
+    "pyqt6>=6.9.1",
+    "qtwidgets>=1.1",
+    "ruff>=0.13.2",
+]
