@@ -37,6 +37,9 @@ class MainWindow(QMainWindow):
 
         self.menu_bar = MenuBar(self)
         self.setup_status_bar()
+        self.center_status_label.setObjectName("StatusLabel")
+        # By default, it's hidden
+        self.center_status_label.hide()
 
         self.setCentralWidget(self.main_tab)
         self.show_welcome_screen()
@@ -202,20 +205,13 @@ class MainWindow(QMainWindow):
             self.undo_status_label.clear()
 
     def show_status_message(self, message, message_type="info", timeout=5000):
-        style = ""
-        if message_type == "warning":
-            style = "background-color: #fff3cd; color: #856404; border: 1px solid #ffc107; border-radius: 3px;"
-        elif message_type == "error":
-            style = "background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; border-radius: 3px;"
-        elif message_type == "success":
-             style = "background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 3px;"
-        else:
-             style = "background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; border-radius: 3px;"
+        self.center_status_label.setProperty("message_type", message_type)
 
-        self.center_status_label.setStyleSheet(style + " padding-left: 10px; padding-right: 10px;")
+        self.center_status_label.style().unpolish(self.center_status_label)
+        self.center_status_label.style().polish(self.center_status_label)
+
         self.center_status_label.setText(message)
         self.center_status_label.show()
-
         QTimer.singleShot(timeout, self.center_status_label.hide)
 
     def select_command_file(self):
@@ -257,7 +253,6 @@ class MainWindow(QMainWindow):
     def update_zoom_label(self):
         percentage = int((self.current_font_size / self.base_font_size) * 100)
         self.zoom_label.setText(f"{percentage}%")
-
 
     def get_current_tab(self):
         current_index = self.main_tab.currentIndex()
@@ -346,7 +341,6 @@ class MainWindow(QMainWindow):
 
         welcome_widget.setLayout(layout)
         return welcome_widget
-
 
     def show_welcome_screen(self):
         if self.main_tab.count() == 0:

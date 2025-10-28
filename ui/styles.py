@@ -1,43 +1,57 @@
 # ui/styles.py
 
-# Excel-like Color Scheme
-COLOR_EXCEL_HEADER_BG = "#f2f2f2"
-COLOR_EXCEL_HEADER_BORDER = "#d0d0d0"
-COLOR_EXCEL_GRID_LINES = "#e1e1e1"
-COLOR_EXCEL_BG_WHITE = "#ffffff"
-COLOR_EXCEL_SELECTION_BLUE = "#cce8ff"
-COLOR_EXCEL_SELECTION_BORDER = "#0078d4"
-COLOR_EXCEL_MENU_BG = "#fafafa"
-COLOR_EXCEL_MENU_BORDER = "#c8c8c8"
-COLOR_EXCEL_MENU_HOVER = "#e5f3ff"
-COLOR_EXCEL_MENU_SELECTED = "#cde6ff"
-COLOR_EXCEL_TEXT_DARK = "#000000"
-COLOR_EXCEL_TEXT_MEDIUM = "#323232"
-COLOR_EXCEL_TEXT_LIGHT = "#666666"
-COLOR_EXCEL_BUTTON_NORMAL = "#f0f0f0"
-COLOR_EXCEL_BUTTON_HOVER = "#e1e1e1"
-COLOR_EXCEL_BUTTON_ACTIVE = "#d0d0d0"
-COLOR_EXCEL_SCROLLBAR = "#e6e6e6"
-COLOR_EXCEL_SCROLLBAR_HANDLE = "#c8c8c8"
-COLOR_EXCEL_ACTIVE_CELL_BORDER = "#ff8000" # Orange for active cell border, like Excel
+# Define color palettes for different themes
+THEMES = {
+    "dark": {
+        "BG_DARK": "hsl(336 0% 1%)",
+        "BG": "hsl(300 0% 4%)",
+        "BG_LIGHT": "hsl(0 0% 9%)",
+        "TEXT": "hsl(300 0% 95%)",
+        "TEXT_MUTED": "hsl(300 0% 69%)",
+        "HIGHLIGHT": "hsl(330 0% 39%)",
+        "BORDER": "hsl(0 0% 28%)",
+        "BORDER_MUTED": "hsl(300 0% 18%)",
+        "PRIMARY": "hsl(210 77% 72%)",
+        "SECONDARY": "hsl(32 61% 63%)",
+        "DANGER": "hsl(9 26% 64%)",
+        "WARNING": "hsl(52 19% 57%)",
+        "SUCCESS": "hsl(146 17% 59%)",
+        "INFO": "hsl(217 28% 65%)",
+    },
+    "light": {
+        "BG_DARK": "hsl(0 0% 90%)",
+        "BG": "hsl(300 0% 95%)",
+        "BG_LIGHT": "hsl(300 50% 100%)",
+        "TEXT": "hsl(300 0% 4%)",
+        "TEXT_MUTED": "hsl(0 0% 28%)",
+        "HIGHLIGHT": "hsl(300 50% 100%)",
+        "BORDER": "hsl(0 0% 50%)",
+        "BORDER_MUTED": "hsl(340 0% 62%)",
+        "PRIMARY": "hsl(207 78% 27%)",
+        "SECONDARY": "hsl(38 100% 17%)",
+        "DANGER": "hsl(9 21% 41%)",
+        "WARNING": "hsl(52 23% 34%)",
+        "SUCCESS": "hsl(147 19% 36%)",
+        "INFO": "hsl(217 22% 41%)",
+    }
+}
 
-app_stylesheet = f"""
-    /* ===== GLOBAL BASE STYLES ===== */
-    /* These apply to ALL widgets through inheritance */
+def get_stylesheet(theme_name="dark"):
+    colors = THEMES.get(theme_name, THEMES["dark"])
+
+    return f"""
+    /* Global */
     QWidget {{
         font-family: "Segoe UI", "Calibri", "Arial";
         font-size: 16px;
-        color: {COLOR_EXCEL_TEXT_DARK};
-        background-color: {COLOR_EXCEL_BG_WHITE};
+        color: {colors["TEXT_MUTED"]};
+        background-color: {colors["BG"]};
     }}
-
-    /* ===== SPECIFIC COMPONENT STYLES ===== */
-    /* Only define what's different from base styles */
 
     /* Menu Bar */
     QMenuBar {{
-        background-color: {COLOR_EXCEL_MENU_BG};
-        border-bottom: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BG_DARK"]};
+        border-bottom: 1px solid {colors["BORDER"]};
         padding: 2px;
     }}
 
@@ -45,17 +59,18 @@ app_stylesheet = f"""
         background-color: transparent;
         padding: 4px 12px;
         border: 1px solid transparent;
+        color: {colors["TEXT"]};
     }}
 
     QMenuBar::item:selected {{
-        background-color: {COLOR_EXCEL_MENU_HOVER};
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BG_LIGHT"]};
+        border: 1px solid {colors["BORDER"]};
     }}
 
     /* Dropdown Menus */
     QMenu {{
-        background-color: {COLOR_EXCEL_MENU_BG};
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BG_DARK"]};
+        border: 1px solid {colors["BORDER"]};
         padding: 1px;
         border-radius: 0px;
     }}
@@ -63,157 +78,193 @@ app_stylesheet = f"""
     QMenu::item {{
         padding: 4px 24px 4px 28px;
         background-color: transparent;
+        color: {colors["TEXT"]};
     }}
 
     QMenu::item:selected {{
-        background-color: {COLOR_EXCEL_SELECTION_BLUE};
+        background-color: {colors["BG_LIGHT"]};
     }}
 
     QMenu::separator {{
         height: 1px;
-        background-color: {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BORDER"]};
         margin: 2px 8px;
     }}
 
-    /* Table View - Excel Style */
+    /* Table View */
     QTableView {{
-        gridline-color: {COLOR_EXCEL_GRID_LINES};
-        selection-background-color: {COLOR_EXCEL_SELECTION_BLUE};
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        gridline-color: {colors["BORDER"]};
+        selection-background-color: {colors["BG_LIGHT"]};
+        border: 1px solid {colors["BORDER"]};
         outline: 0;
     }}
 
     QTableView::item:selected {{
-        background-color: {COLOR_EXCEL_SELECTION_BLUE};
-        color: {COLOR_EXCEL_TEXT_DARK}; /* Ensure text is dark */
+        background-color: {colors["BG_LIGHT"]};
+        color: {colors["TEXT"]};
     }}
 
     QTableView QLineEdit {{
-        color: {COLOR_EXCEL_TEXT_DARK};
-        background-color: {COLOR_EXCEL_BG_WHITE};
-        border: 1px solid {COLOR_EXCEL_ACTIVE_CELL_BORDER};
-        selection-color: {COLOR_EXCEL_TEXT_DARK};
-        selection-background-color: {COLOR_EXCEL_SELECTION_BLUE};
+        color: {colors["TEXT"]};
+        background-color: {colors["BG"]};
+        border: 1px solid {colors["BG_LIGHT"]};
+        selection-color: {colors["TEXT"]};
+        selection-background-color: {colors["BG_LIGHT"]};
     }}
 
     /* Headers */
     QHeaderView::section {{
-        background-color: {COLOR_EXCEL_HEADER_BG};
+        background-color: {colors["BG_DARK"]};
         padding: 4px;
-        border: 1px solid {COLOR_EXCEL_HEADER_BORDER};
+        border: 1px solid {colors["BORDER"]};
         border-top: none;
         border-left: none;
         font-weight: normal;
+        color: {colors["TEXT"]};
     }}
 
     QHeaderView::section:last {{
-        border-right: 1px solid {COLOR_EXCEL_HEADER_BORDER};
+        border-right: 1px solid {colors["BORDER"]};
     }}
 
     /* Buttons */
     QPushButton {{
-        background-color: {COLOR_EXCEL_BUTTON_NORMAL};
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BG_DARK"]};
+        border: 1px solid {colors["BORDER"]};
         padding: 4px 12px;
         min-width: 75px;
         min-height: 24px;
+        color: {colors["TEXT"]};
     }}
 
     QPushButton:hover {{
-        background-color: {COLOR_EXCEL_BUTTON_HOVER};
+        background-color: {colors["BG_LIGHT"]};
     }}
 
     QPushButton:pressed {{
-        background-color: {COLOR_EXCEL_BUTTON_ACTIVE};
+        background-color: {colors["BG"]};
     }}
 
     QPushButton:disabled {{
-        background-color: {COLOR_EXCEL_MENU_BG};
-        color: {COLOR_EXCEL_TEXT_LIGHT};
+        background-color: {colors["BG_DARK"]};
+        color: {colors["TEXT_MUTED"]};
     }}
 
     QPushButton#StatusBarButton {{
-        border: none; /* Remove border */
-        padding: 2px 4px; /* Smaller padding */
-        background-color: transparent; /* Flat background */
-        min-width: 15px; /* Allow smaller width */
-        min-height: 15px; /* Allow smaller height */
-        /* You can set a fixed size here too if preferred */
-        /* fixed-width: 25px; */
-        /* fixed-height: 25px; */
+        border: none;
+        padding: 2px 4px;
+        background-color: transparent;
+        min-width: 15px;
+        min-height: 15px;
     }}
 
     QPushButton#StatusBarButton:hover {{
-        background-color: {COLOR_EXCEL_BUTTON_HOVER}; /* Subtle hover */
+        background-color: {colors["BG_LIGHT"]};
     }}
 
     QPushButton#StatusBarButton:pressed {{
-        background-color: {COLOR_EXCEL_BUTTON_ACTIVE}; /* Subtle press */
+        background-color: {colors["BG"]};
     }}
 
     /* Input Fields */
     QLineEdit, QTextEdit {{
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        border: 1px solid {colors["BORDER"]};
         padding: 2px 4px;
-        selection-background-color: {COLOR_EXCEL_SELECTION_BLUE};
+        selection-background-color: {colors["BG_LIGHT"]};
+        background-color: {colors["BG_DARK"]};
+        color: {colors["TEXT"]};
     }}
 
     QLineEdit:focus, QTextEdit:focus {{
-        border: 1px solid {COLOR_EXCEL_SELECTION_BORDER};
+        border: 1px solid {colors["BG_LIGHT"]};
     }}
 
     /* Scrollbars */
     QScrollBar:vertical {{
-        background-color: {COLOR_EXCEL_SCROLLBAR};
+        background-color: {colors["BG"]};
         width: 16px;
         margin: 0px;
     }}
 
     QScrollBar::handle:vertical {{
-        background-color: {COLOR_EXCEL_SCROLLBAR_HANDLE};
+        background-color: {colors["BG_DARK"]};
         min-height: 20px;
         margin: 2px;
     }}
 
     QScrollBar:horizontal {{
-        background-color: {COLOR_EXCEL_SCROLLBAR};
+        background-color: {colors["BG"]};
         height: 16px;
         margin: 0px;
     }}
 
     QScrollBar::handle:horizontal {{
-        background-color: {COLOR_EXCEL_SCROLLBAR_HANDLE};
+        background-color: {colors["BG_DARK"]};
         min-width: 20px;
         margin: 2px;
     }}
 
     /* Tab Widget */
     QTabWidget::pane {{
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        border: 1px solid {colors["BORDER"]};
         top: -1px;
     }}
 
     QTabBar::tab {{
-        background-color: {COLOR_EXCEL_MENU_BG};
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BG_DARK"]};
+        border: 1px solid {colors["BORDER"]};
         border-bottom: none;
         padding: 4px 12px;
         margin-right: 1px;
+        color: {colors["TEXT_MUTED"]};
     }}
 
     QTabBar::tab:selected {{
-        background-color: {COLOR_EXCEL_BG_WHITE};
-        border-bottom: 1px solid {COLOR_EXCEL_BG_WHITE};
+        background-color: {colors["BG"]};
+        border-bottom: 1px solid {colors["BG"]};
+        color: {colors["TEXT"]};
     }}
 
     QTabBar::tab:hover:!selected {{
-        background-color: {COLOR_EXCEL_BUTTON_HOVER};
+        background-color: {colors["BG_LIGHT"]};
     }}
 
     /* Tooltips */
     QToolTip {{
-        background-color: #ffffe1;
-        border: 1px solid {COLOR_EXCEL_MENU_BORDER};
+        background-color: {colors["BG_DARK"]};
+        border: 1px solid {colors["BORDER"]};
         padding: 2px 4px;
+        color: {colors["TEXT"]};
+    }}
+
+    /* Status Message Label */
+    QLabel#StatusLabel {{
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 3px;
+    }}
+
+    QLabel#StatusLabel[message_type="info"] {{
+        background-color: {colors["INFO"]};
+        color: {colors["TEXT"]};
+        border: 1px solid {colors["BORDER"]};
+    }}
+
+    QLabel#StatusLabel[message_type="success"] {{
+        background-color: {colors["SUCCESS"]};
+        color: {colors["TEXT"]};
+        border: 1px solid {colors["BORDER"]};
+    }}
+
+    QLabel#StatusLabel[message_type="warning"] {{
+        background-color: {colors["WARNING"]};
+        color: {colors["TEXT"]};
+        border: 1px solid {colors["BORDER"]};
+    }}
+
+    QLabel#StatusLabel[message_type="error"] {{
+        background-color: {colors["DANGER"]};
+        color: {colors["TEXT"]};
+        border: 1px solid {colors["BORDER"]};
     }}
 """

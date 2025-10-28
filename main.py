@@ -1,13 +1,14 @@
 import sys
 from ui.window import MainWindow
 from PyQt6.QtWidgets import QApplication
-from ui.styles import app_stylesheet
+from ui.styles import get_stylesheet
 
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Test Case Editor")
     app.setApplicationVersion("0.1")
-    app.setStyleSheet(app_stylesheet)
+    style_sheet = get_stylesheet()
+    app.setStyleSheet(style_sheet)
     editor = MainWindow()
     editor.show()
 

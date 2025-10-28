@@ -37,7 +37,7 @@ class Table(QWidget):
         v_header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.auto_adjust_cells()
         self.table.setWordWrap(True)
-        self.table.setAlternatingRowColors(True)
+        self.table.setAlternatingRowColors(False)
         self.table.setSortingEnabled(False)
 
     def auto_adjust_cells(self):
