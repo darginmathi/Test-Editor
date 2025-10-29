@@ -7,7 +7,7 @@ def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Test Case Editor")
     app.setApplicationVersion("0.1")
-    style_sheet = get_stylesheet()
+    style_sheet = get_stylesheet("dark")
     app.setStyleSheet(style_sheet)
     editor = MainWindow()
     editor.show()

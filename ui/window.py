@@ -38,7 +38,6 @@ class MainWindow(QMainWindow):
         self.menu_bar = MenuBar(self)
         self.setup_status_bar()
         self.center_status_label.setObjectName("StatusLabel")
-        # By default, it's hidden
         self.center_status_label.hide()
 
         self.setCentralWidget(self.main_tab)

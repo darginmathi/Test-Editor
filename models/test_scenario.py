@@ -1,12 +1,19 @@
 import pandas as pd
 from .model import TableModel
 
+from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal
+
 class TestScenarioModel(TableModel):
 
     TYPE_COL = 0
     ID_COL = 1
+    SKIP_COL = 2
+    DESC_COL = 3
+    STEPS_COL = 4
+    EXPECTED_COL = 5
     COMMAND_COL = 6
     DATA1_COL = 7
+    DATA5_COL = 11
 
     def __init__(self, df: pd.DataFrame = None):
         super().__init__(df=df)
@@ -28,59 +35,71 @@ class TestScenarioModel(TableModel):
         ]
         return pd.DataFrame(data, columns=columns)
 
-    '''def insertRows(self, position, rows, parent=QModelIndex()):
-        if self.df.empty:
-            return False
-
-        try:
-            self.beginInsertRows(parent, position, position + rows - 1)
-            new_rows = pd.DataFrame([[""]*len(self.df.columns)] * rows, columns=self.df.columns)
-            self.df = pd.concat([self.df.iloc[:position], new_rows, self.df.iloc[position:]]).reset_index(drop=True)
-            self.endInsertRows()
-
-            # abbr = ""
-            tc_counter = 1
-
-            for i in range(len(self.df)):
-                cell_id = str(self.df.iat[i, self.ID_COL])
-                if cell_id.startswith("TC-"):
-                    abbr = cell_id[3:5] # Grabs 'QS' from 'TC-QS_AUT1'
-                    break
-
-            if abbr:
-                indices_to_update = []
-                for i in range(len(self.df)):
-                    cell_type = str(self.df.iat[i, self.TYPE_COL])
-                    if cell_type == "TC":
-                        new_id = f"TC-{abbr}_AUT{tc_counter}"
-                        self.df.iat[i, self.ID_COL] = new_id
-                        tc_counter += 1
-
-                        # Tell the view to redraw this cell
-                        index = self.index(i, self.ID_COL)
-                        indices_to_update.append(index)
-
-                if indices_to_update:
-                    first = indices_to_update[0]
-                    last = indices_to_update[-1]
-                    self.dataChanged.emit(first, last, [Qt.ItemDataRole.DisplayRole])
-
-            self.has_unsaved_changes = True
-            return True
-
-        except Exception as e:
-            print(f"Error in insertRows: {e}")
-            self.endInsertRows()
-            return False'''
-
-    '''def removeRows(self, position, rows, parent=QModelIndex()):
-        success = super().removeRows(position, rows, parent)
-
+    def insertRows(self, position, rows, parent=QModelIndex()):
+        success = super().insertRows(position, rows, parent)
         if success:
-            self.update_test_case_ids()
+            try:
+                for i in range(rows):
+                    row_index = position + i
+                    type_index = self.index(row_index, self.TYPE_COL)
 
+                    if row_index < len(self.df):
+                        self.df.iat[row_index, self.TYPE_COL] = "TC"
+                        self.dataChanged.emit(type_index, type_index, [Qt.ItemDataRole.EditRole])
+
+                self._update_test_case_ids()
+            except Exception as e:
+                    print(f"Error setting type or updating IDs after insert: {e}")
+                    return False
         return success
 
-    def update_test_case_ids(self):
-        pass'''
+    def removeRows(self, position, rows, parent=QModelIndex()):
+        success = super().removeRows(position, rows, parent)
+        if success:
+            self._update_test_case_ids()
+        return success
+
+    def _reinsert_dataframe(self, position, df_to_insert):
+         success = super()._reinsert_dataframe(position, df_to_insert)
+         if success:
+             self._update_test_case_ids()
+         return success
+
+    def _update_test_case_ids(self):
+        if self.df.empty:
+            return
+        abbr = ""
+        tc_counter = 1
+        indices_to_update = []
+
+        for i in range(len(self.df)):
+            cell_type = str(self.df.iat[i, self.TYPE_COL])
+            if cell_type == "TC":
+                cell_id = str(self.df.iat[i, self.ID_COL])
+                if cell_id.startswith("TC-") and len(cell_id) > 5:
+                    abbr = cell_id[3:5]
+                    break
+
+        if not abbr:
+            abbr = "UN"
+
+        for i in range(len(self.df)):
+            cell_type = str(self.df.iat[i, self.TYPE_COL])
+            if cell_type == "TC":
+                old_id = str(self.df.iat[i, self.ID_COL])
+                new_id = f"TC-{abbr}_AUT{tc_counter}"
+                if new_id != old_id:
+                    self.df.iat[i, self.ID_COL] = new_id
+                    index = self.index(i, self.ID_COL)
+                    indices_to_update.append(index)
+                tc_counter += 1
+
+        if indices_to_update:
+            first = indices_to_update[0]
+            last = indices_to_update[-1]
+
+            self.dataChanged.emit(first, last, [Qt.ItemDataRole.DisplayRole])
+
+
+
 

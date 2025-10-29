@@ -3,14 +3,14 @@
 # Define color palettes for different themes
 THEMES = {
     "dark": {
-        "BG_DARK": "hsl(336 0% 1%)",
-        "BG": "hsl(300 0% 4%)",
-        "BG_LIGHT": "hsl(0 0% 9%)",
-        "TEXT": "hsl(300 0% 95%)",
-        "TEXT_MUTED": "hsl(300 0% 69%)",
+        "BG_DARK": "hsl(0 0% 0%)",
+        "BG": "hsl(0 0% 5%)",
+        "BG_LIGHT": "hsl(0 0% 10%)",
+        "TEXT": "hsl(0 0% 95%)",
+        "TEXT_MUTED": "hsl(0 0% 79%)",
         "HIGHLIGHT": "hsl(330 0% 39%)",
-        "BORDER": "hsl(0 0% 28%)",
-        "BORDER_MUTED": "hsl(300 0% 18%)",
+        "BORDER": "hsl(0 0% 30%)",
+        "BORDER_MUTED": "hsl(0 0% 18%)",
         "PRIMARY": "hsl(210 77% 72%)",
         "SECONDARY": "hsl(32 61% 63%)",
         "DANGER": "hsl(9 26% 64%)",
@@ -37,6 +37,7 @@ THEMES = {
 }
 
 def get_stylesheet(theme_name="dark"):
+    print(f"Theme requested: {theme_name}")
     colors = THEMES.get(theme_name, THEMES["dark"])
 
     return f"""
