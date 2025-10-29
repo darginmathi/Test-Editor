@@ -1,43 +1,39 @@
-# ui/styles.py
-
-# Define color palettes for different themes
 THEMES = {
     "dark": {
-        "BG_DARK": "hsl(0 0% 0%)",
-        "BG": "hsl(0 0% 5%)",
-        "BG_LIGHT": "hsl(0 0% 10%)",
-        "TEXT": "hsl(0 0% 95%)",
-        "TEXT_MUTED": "hsl(0 0% 79%)",
-        "HIGHLIGHT": "hsl(330 0% 39%)",
-        "BORDER": "hsl(0 0% 30%)",
-        "BORDER_MUTED": "hsl(0 0% 18%)",
-        "PRIMARY": "hsl(210 77% 72%)",
-        "SECONDARY": "hsl(32 61% 63%)",
-        "DANGER": "hsl(9 26% 64%)",
-        "WARNING": "hsl(52 19% 57%)",
-        "SUCCESS": "hsl(146 17% 59%)",
-        "INFO": "hsl(217 28% 65%)",
+        "BG_DARK": "hsl(0, 0%, 0%)",
+        "BG": "hsl(0, 0%, 5%)",
+        "BG_LIGHT": "hsl(0, 0%, 10%)",
+        "TEXT": "hsl(0, 0%, 95%)",
+        "TEXT_MUTED": "hsl(0, 0%, 70%)",
+        "HIGHLIGHT": "hsl(0, 0%, 40%)",
+        "BORDER": "hsl(0, 0%, 30%)",
+        "BORDER_MUTED": "hsl(0, 0%, 20%)",
+        "PRIMARY": "hsl(206, 100%, 65%)",
+        "SECONDARY": "hsl(40, 100%, 37%)",
+        "DANGER": "hsl(7, 100%, 66%)",
+        "WARNING": "hsl(53, 100%, 70%)",
+        "SUCCESS": "hsl(162, 100%, 22%)",
+        "INFO": "hsl(217, 100%, 70%)",
     },
     "light": {
-        "BG_DARK": "hsl(0 0% 90%)",
-        "BG": "hsl(300 0% 95%)",
-        "BG_LIGHT": "hsl(300 50% 100%)",
-        "TEXT": "hsl(300 0% 4%)",
-        "TEXT_MUTED": "hsl(0 0% 28%)",
-        "HIGHLIGHT": "hsl(300 50% 100%)",
-        "BORDER": "hsl(0 0% 50%)",
-        "BORDER_MUTED": "hsl(340 0% 62%)",
-        "PRIMARY": "hsl(207 78% 27%)",
-        "SECONDARY": "hsl(38 100% 17%)",
-        "DANGER": "hsl(9 21% 41%)",
-        "WARNING": "hsl(52 23% 34%)",
-        "SUCCESS": "hsl(147 19% 36%)",
-        "INFO": "hsl(217 22% 41%)",
+        "BG_DARK": "hsl(0, 0%, 95%)",
+        "BG": "hsl(0, 0%, 100%)",
+        "BG_LIGHT": "hsl(0, 0%, 100%)",
+        "TEXT": "hsl(0, 0%, 5%)",
+        "TEXT_MUTED": "hsl(0, 0%, 30%)",
+        "HIGHLIGHT": "hsl(0, 0%, 60%)",
+        "BORDER": "hsl(0, 0%, 700%)",
+        "BORDER_MUTED": "hsl(0, 0%, 80%)",
+        "PRIMARY": "hsl(206, 100%, 65%)",
+        "SECONDARY": "hsl(40, 100%, 37%)",
+        "DANGER": "hsl(7, 100%, 66%)",
+        "WARNING": "hsl(53, 100%, 70%)",
+        "SUCCESS": "hsl(162, 100%, 22%)",
+        "INFO": "hsl(217, 100%, 70%)",
     }
 }
 
 def get_stylesheet(theme_name="dark"):
-    print(f"Theme requested: {theme_name}")
     colors = THEMES.get(theme_name, THEMES["dark"])
 
     return f"""
@@ -247,25 +243,45 @@ def get_stylesheet(theme_name="dark"):
 
     QLabel#StatusLabel[message_type="info"] {{
         background-color: {colors["INFO"]};
-        color: {colors["TEXT"]};
+        color: {colors["BG"]};
         border: 1px solid {colors["BORDER"]};
     }}
 
     QLabel#StatusLabel[message_type="success"] {{
         background-color: {colors["SUCCESS"]};
-        color: {colors["TEXT"]};
+        color: {colors["BG"]};
         border: 1px solid {colors["BORDER"]};
     }}
 
     QLabel#StatusLabel[message_type="warning"] {{
         background-color: {colors["WARNING"]};
-        color: {colors["TEXT"]};
+        color: {colors["BG"]};
         border: 1px solid {colors["BORDER"]};
     }}
 
     QLabel#StatusLabel[message_type="error"] {{
         background-color: {colors["DANGER"]};
-        color: {colors["TEXT"]};
+        color: {colors["BG"]};
         border: 1px solid {colors["BORDER"]};
+    }}
+
+        /* Welcome Screen Styles */
+    QLabel[class="welcome-logo"] {{
+        font-size: 64px;
+        font-weight: bold;
+        padding: 40px;
+    }}
+
+    QLabel[class="welcome-instructions"] {{
+        font-size: 22px;
+        margin-top: 30px;
+        line-height: 1.5;
+    }}
+
+    QLabel[class="welcome-tips"] {{
+        font-size: 22px;
+        margin-top: 30px;
+        line-height: 1.5;
+        padding-left: 80px;
     }}
 """

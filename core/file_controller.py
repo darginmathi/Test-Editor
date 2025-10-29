@@ -96,25 +96,29 @@ class FileController:
 
     def save_file(self):
         tab = self.main.get_current_tab()
-        if tab:
-            if tab.model1.df.empty and tab.model2.df.empty:
-                return
+        if tab and hasattr(tab, 'model1') and hasattr(tab, 'model2'):
+            if tab:
+                if tab.model1.df.empty and tab.model2.df.empty:
+                    return
 
-            scenario_path = tab.scenario_path
-            obj_path = tab.obj_path
+                scenario_path = tab.scenario_path
+                obj_path = tab.obj_path
 
-            if scenario_path and obj_path:
-                try:
-                    self._write_files(scenario_path, obj_path)
-                    tab.mark_saved()
-                except (FileNotFoundError, PermissionError) as e:
-                    QMessageBox.critical(self.main, "Error", f"Permission denied or path not found when saving files:\n{str(e)}")
-                    return False
-                except Exception as e:
-                    QMessageBox.critical(self.main, "Error", f"An unexpected error occurred while saving files:\n{str(e)}")
-                    return False
+                if scenario_path and obj_path:
+                    try:
+                        self._write_files(scenario_path, obj_path)
+                        tab.mark_saved()
+                    except (FileNotFoundError, PermissionError) as e:
+                        QMessageBox.critical(self.main, "Error", f"Permission denied or path not found when saving files:\n{str(e)}")
+                        return False
+                    except Exception as e:
+                        QMessageBox.critical(self.main, "Error", f"An unexpected error occurred while saving files:\n{str(e)}")
+                        return False
+                else:
+                    return self.save_file_as(tab)
             else:
-                return self.save_file_as(tab)
+                QMessageBox.information(self.main, "No File", "No test case file is currently open.")
+                return False
 
     def save_file_as(self, tab):
         if not tab:

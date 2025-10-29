@@ -287,57 +287,21 @@ class MainWindow(QMainWindow):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         logo = QLabel()
-        '''current_file = Path(__file__)
-        project_root = current_file.parent.parent
-        logo_path = project_root / "assets" / "test_case_studio.png"
-        pixmap = QPixmap(str(logo_path))
-
-        logo.setPixmap(pixmap.scaled(400, 400, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
-        logo.setAlignment(Qt.AlignmentFlag.AlignCenter)'''
         logo.setText("Test Case Studio")
-        logo.setStyleSheet("""
-            QLabel {
-                font-size: 64px;
-                font-weight: bold;
-                color: #2c3e50;
-                padding: 40px;
-            }
-        """)
+        logo.setProperty("class", "welcome-logo")
         logo.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        instructions = QLabel(
-            "Create a new file or open an existing one to get started"
-        )
-        instructions.setStyleSheet("""
-            QLabel {
-                font-size: 22px;
-                color: #7f8c8d;
-                margin-top: 30px;
-                line-height: 1.5;
-            }
-        """)
+        instructions = QLabel("Create a new file or open an existing one to get started")
+        instructions.setProperty("class", "welcome-instructions")
         instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        tips = QLabel(
-            "• Use Ctrl+N to create a new test case\n"
-            "• Use Ctrl+O to open existing test cases\n"
-            "• Use Ctrl+R to auto-adjust cell sizes"
-        )
-        tips.setStyleSheet("""
-            QLabel {
-                font-size: 22px;
-                color: #7f8c8d;
-                margin-top: 30px;
-                line-height: 1.5;
-                padding-left: 80px;
-            }
-        """)
+        tips = QLabel("• Use Ctrl+N to create a new test case\n• Use Ctrl+O to open existing test cases\n• Use Ctrl+R to auto-adjust cell sizes")
+        tips.setProperty("class", "welcome-tips")
         tips.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         layout.addWidget(logo)
         layout.addWidget(instructions)
         layout.addWidget(tips)
-
         welcome_widget.setLayout(layout)
         return welcome_widget
 
