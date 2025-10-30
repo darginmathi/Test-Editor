@@ -11,8 +11,8 @@ THEMES = {
         "PRIMARY": "hsl(206, 100%, 65%)",
         "SECONDARY": "hsl(40, 100%, 37%)",
         "DANGER": "hsl(7, 100%, 66%)",
-        "WARNING": "hsl(53, 100%, 70%)",
-        "SUCCESS": "hsl(162, 100%, 22%)",
+        "WARNING": "hsl(45, 100%, 90%)",
+        "SUCCESS": "hsl(120, 41%, 94%)",
         "INFO": "hsl(217, 100%, 70%)",
     },
     "light": {
@@ -178,27 +178,59 @@ def get_stylesheet(theme_name="dark"):
 
     /* Scrollbars */
     QScrollBar:vertical {{
+        border: none; /* Remove default border */
+        border-left: 1px solid {colors["BORDER"]};
         background-color: {colors["BG"]};
         width: 16px;
         margin: 0px;
     }}
 
     QScrollBar::handle:vertical {{
-        background-color: {colors["BG_DARK"]};
+        background-color: {colors["HIGHLIGHT"]}; /* The handle (40% grey) */
         min-height: 20px;
-        margin: 2px;
+        margin: 2px 4px; /* Give it some horizontal padding */
+        border-radius: 4px; /* Rounded corners */
+    }}
+
+    /* This styles the track *above* the handle */
+    QScrollBar::sub-page:vertical {{
+        background-color: {colors["BG_DARK"]}; /* The track background (0% black) */
+    }}
+    /* This styles the track *below* the handle */
+    QScrollBar::add-page:vertical {{
+        background-color: {colors["BG_DARK"]}; /* The track background (0% black) */
+    }}
+
+    /* Hide the top/bottom arrow buttons */
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+        height: 0px;
+        border: none;
+        background: none;
     }}
 
     QScrollBar:horizontal {{
+        border: none;
+        border-top: 1px solid {colors["BORDER"]};
         background-color: {colors["BG"]};
         height: 16px;
         margin: 0px;
     }}
 
     QScrollBar::handle:horizontal {{
-        background-color: {colors["BG_DARK"]};
+        background-color: {colors["HIGHLIGHT"]};
         min-width: 20px;
-        margin: 2px;
+        margin: 4px 2px; /* Give it some vertical padding */
+        border-radius: 4px;
+    }}
+
+    QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
+        background-color: {colors["BG_DARK"]}; /* The track background (0% black) */
+    }}
+
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+        width: 0px;
+        border: none;
+        background: none;
     }}
 
     /* Tab Widget */

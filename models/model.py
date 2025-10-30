@@ -107,4 +107,107 @@ class TableModel(QAbstractTableModel):
     def mark_saved(self):
         self.has_unsaved_changes = False
 
+    def _check_cell_match(self, r, c, find_text_lower, match_cell):
+        cell_value = self.data(self.index(r, c), Qt.ItemDataRole.DisplayRole)
+        if cell_value:
+            cell_value_lower = str(cell_value).lower()
+            if match_cell:
+                if cell_value_lower == find_text_lower:
+                    return True
+            else:
+                if find_text_lower in cell_value_lower:
+                    return True
+        return False
+
+    def find_next(self, text, start_index, match_cell=False):
+        if self.df.empty or not text:
+            return QModelIndex(), False
+
+        find_text_lower = text.lower()
+        start_row = start_index.row()
+        start_col = start_index.column()
+
+        if start_col < self.columnCount() - 1:
+            start_col += 1
+        else:
+            if start_row < self.rowCount() - 1:
+                 start_row += 1
+                 start_col = 0
+            else:
+                 start_row = 0
+                 start_col = 0
+
+        current_col = start_col
+        for r in range(start_row, self.rowCount()):
+            for c in range(current_col, self.columnCount()):
+                if self._check_cell_match(r, c, find_text_lower, match_cell):
+                    return self.index(r, c), False
+            current_col = 0
+
+        for r in range(0, start_row + 1):
+            end_col = start_index.column() + 1 if r == start_index.row() else self.columnCount()
+            for c in range(0, end_col):
+                if self._check_cell_match(r, c, find_text_lower, match_cell):
+                    return self.index(r, c), True
+
+        return QModelIndex(), False
+
+    def find_prev(self, text, start_index, match_cell=False):
+        if self.df.empty or not text:
+            return QModelIndex(), False
+
+        find_text_lower = text.lower()
+        start_row = start_index.row()
+        start_col = start_index.column()
+
+        if start_col > 0:
+            start_col -= 1
+        else:
+            if start_row > 0:
+                start_row -= 1
+                start_col = self.columnCount() - 1
+            else:
+                start_row = self.rowCount() - 1
+                start_col = self.columnCount() - 1
+
+        current_col = start_col
+        for r in range(start_row, -1, -1):
+            for c in range(current_col, -1, -1):
+                if self._check_cell_match(r, c, find_text_lower, match_cell):
+                    return self.index(r, c), False
+            current_col = self.columnCount() - 1
+
+        for r in range(self.rowCount() - 1, start_index.row() - 1, -1):
+            start_c = start_index.column() - 1 if r == start_index.row() else self.columnCount() - 1
+            for c in range(start_c, -1, -1):
+                if self._check_cell_match(r, c, find_text_lower, match_cell):
+                    return self.index(r, c), True
+
+        return QModelIndex(), False
+
+    def find_all(self, text, match_cell=False):
+        matches = []
+        if self.df.empty or not text:
+            return matches
+
+        find_text = text.lower()
+
+        for i in range(self.rowCount()):
+            for j in range(self.columnCount()):
+                cell_value = self.data(self.index(i, j), Qt.ItemDataRole.DisplayRole)
+                if cell_value:
+                    cell_value_lower = str(cell_value).lower()
+                    if match_cell:
+                        if cell_value_lower == find_text:
+                            matches.append(self.index(i, j))
+                    else:
+                        if find_text in cell_value_lower:
+                            matches.append(self.index(i, j))
+        return matches
+
+
+
+
+
+
 

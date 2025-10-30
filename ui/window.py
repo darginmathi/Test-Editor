@@ -1,12 +1,15 @@
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton,
-                             QFrame)
-from PyQt6.QtCore import Qt, QTimer, QSettings
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView)
+from PyQt6.QtCore import Qt, QTimer, QSettings, QModelIndex
 from PyQt6.QtGui import QAction, QKeySequence
 
+import re
 from .menu import MenuBar
 from core import FileController
 from .tab import TabWidget
+from models import TableModel
 from core.command_manager import CommandManager
+from .find_replace import FindReplace
+from core.undo_commands import EditCellCommand
 
 
 class MainWindow(QMainWindow):
@@ -18,8 +21,8 @@ class MainWindow(QMainWindow):
 
         self.current_font_size = 12
         self.base_font_size = self.current_font_size
-
         self.current_connected_stack = None
+        self.last_find_index = QModelIndex()
 
         self.main_tab = QTabWidget()
         self.main_tab.setTabsClosable(True)
@@ -39,6 +42,7 @@ class MainWindow(QMainWindow):
         self.setup_status_bar()
         self.center_status_label.setObjectName("StatusLabel")
         self.center_status_label.hide()
+        self._setup_find_and_replace()
 
         self.setCentralWidget(self.main_tab)
         self.show_welcome_screen()
@@ -324,6 +328,142 @@ class MainWindow(QMainWindow):
             widget = self.main_tab.widget(i)
             if isinstance(widget, TabWidget):
                 widget.update_delegate_commands(new_command_list)
+
+    def _setup_find_and_replace(self):
+        self.find_dialog = FindReplace(self)
+        self.find_dialog.hide()
+
+        self.find_dialog.findNextClicked.connect(self.on_find_next)
+        self.find_dialog.findPrevClicked.connect(self.on_find_prev)
+        self.find_dialog.replaceClicked.connect(self.on_replace)
+        self.find_dialog.replaceAllClicked.connect(self.on_replace_all)
+
+    def _show_find_dialog(self):
+        self.last_find_index = QModelIndex()
+
+        main_geo = self.geometry()
+
+        dialog_size = self.find_dialog.sizeHint()
+        status_bar_height = self.status_bar.height()
+
+        margin = 10
+        new_x = main_geo.left() + margin
+        new_y = main_geo.bottom() - dialog_size.height() - status_bar_height - margin
+        self.find_dialog.move(new_x, new_y)
+
+        self.find_dialog.show()
+        self.find_dialog.activateWindow()
+        self.find_dialog.find_input.setFocus()
+        self.find_dialog.find_input.selectAll()
+
+    def on_find_prev(self, find_text, match_cell):
+        current_table = self.get_current_table()
+        if not current_table or not find_text:
+            return
+
+        model = current_table.model
+
+        start_index = self.last_find_index
+        if not start_index.isValid():
+            start_index = model.index(model.rowCount(), 0)
+
+        prev_match, wrapped  = model.find_prev(find_text, start_index, match_cell)
+
+        if prev_match.isValid():
+            self.last_find_index = prev_match
+            current_table.table.scrollTo(prev_match, QTableView.ScrollHint.PositionAtCenter)
+            current_table.table.setCurrentIndex(prev_match)
+        else:
+            self.last_find_index = QModelIndex()
+            self.show_status_message(f"No Instance of '{find_text}' found.", "info", 5000)
+
+    def on_find_next(self, find_text, match_cell):
+        current_table = self.get_current_table()
+        if not current_table or not find_text:
+            return
+
+        model = current_table.model
+
+        start_index = self.last_find_index
+        if not start_index.isValid():
+            start_index = model.index(-1, -1)
+
+        next_match, wrapped = model.find_next(find_text, start_index, match_cell)
+
+        if next_match.isValid():
+            self.last_find_index = next_match
+            current_table.table.scrollTo(next_match, QTableView.ScrollHint.PositionAtCenter)
+            current_table.table.setCurrentIndex(next_match)
+        else:
+            self.last_find_index = QModelIndex()
+            self.show_status_message(f"No Instance of '{find_text}' found.", "info", 5000)
+
+    def on_replace(self, find_text, replace_text, match_cell):
+        current_table = self.get_current_table()
+        current_tab = self.get_current_tab()
+
+        if not current_table  or not find_text:
+            return
+
+        current_index = current_table.table.currentIndex()
+        if not current_index.isValid():
+            self.on_find_next(find_text, match_cell)
+            return
+
+        model = current_table.model
+        current_text = model.data(current_index, Qt.ItemDataRole.DisplayRole) or ""
+
+        matches = False
+        if match_cell:
+            matches = (find_text.lower() == current_text.lower())
+        else:
+            matches = (find_text.lower() in current_text.lower())
+
+        if matches:
+            old_value = current_text
+            if match_cell:
+                new_value = replace_text
+            else:
+                new_value = re.sub(find_text, replace_text, old_value, flags=re.IGNORECASE)
+
+            cmd = EditCellCommand(model, current_index, new_value, old_value)
+            current_tab.undo_stack.push(cmd)
+
+            self.last_find_index = current_index
+            self.on_find_next(find_text, match_cell)
+
+
+    def on_replace_all(self, find_text, replace_text, match_cell):
+        current_table = self.get_current_table()
+        current_tab = self.get_current_tab()
+        if not current_table or not current_tab or not find_text:
+            return
+
+        model = current_table.model
+        matches = model.find_all(find_text, match_cell)
+
+        if not matches:
+            self.show_status_message(f"No occurrences of '{find_text}' found.", "info", 5000)
+            return
+
+        current_tab.undo_stack.beginMacro(f"Replace All '{find_text}'")
+
+        for index in matches:
+            old_value = model.data(index, Qt.ItemDataRole.DisplayRole) or ""
+
+            if match_cell:
+                new_value = replace_text
+            else:
+                new_value = re.sub(find_text, replace_text, old_value, flags=re.IGNORECASE)
+
+            if new_value != old_value:
+                cmd = EditCellCommand(model, index, new_value, old_value)
+                current_tab.undo_stack.push(cmd)
+
+        current_tab.undo_stack.endMacro()
+        self.show_status_message(f"Replaced {len(matches)} occurrences.", "success", 3000)
+
+
 
 
 

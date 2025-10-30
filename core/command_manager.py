@@ -20,7 +20,6 @@ class CommandManager(QObject):
             df = pd.read_excel(filepath, sheet_name=0, usecols=[0], header=None)
             self.commands = sorted(df[0].dropna().astype(str).tolist())
             self.file_path = filepath
-            print(f"Loaded {len(self.commands)} commands.") # For debugging
             self.commandsReloaded.emit(self.commands)
             return True
         except FileNotFoundError:

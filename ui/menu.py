@@ -1,4 +1,4 @@
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import QMenuBar
 
 from ui.tab import TabWidget
@@ -65,6 +65,12 @@ class MenuBar(QMenuBar):
         edit_menu = menubar.addMenu("Edit")
         edit_menu.addAction(self.main.undo_action)
         edit_menu.addAction(self.main.redo_action)
+
+        edit_menu.addSeparator()
+        find_action = QAction("Find/Replace", self.main)
+        find_action.setShortcut(QKeySequence.StandardKey.Find)
+        find_action.triggered.connect(self.main._show_find_dialog)
+        edit_menu.addAction(find_action)
 
     def auto_adjust_cells(self):
         table = self.main.get_current_table()
