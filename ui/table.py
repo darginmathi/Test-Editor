@@ -43,6 +43,9 @@ class Table(QWidget):
     def auto_adjust_cells(self):
         self.table.resizeColumnsToContents()
 
+    def auto_adjust_rows(self):
+        self.table.resizeRowsToContents()
+
     def setup_context_menu(self):
         self.table.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.show_context_menu)

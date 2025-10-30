@@ -86,6 +86,7 @@ class MenuBar(QMenuBar):
             for col_index in range(7, 12):
                 scenario_table_view.setColumnWidth(col_index, 250)
             self.main.status_bar.clearMessage()
+
         else:
             self.main.show_status_message(
                 "Fixed widths only apply to the active TestScenario table.",

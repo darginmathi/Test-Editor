@@ -86,7 +86,7 @@ class FileController:
             scenario_table_view.setColumnWidth(6, 250) # Command
             for col_index in range(7, 12):
                 scenario_table_view.setColumnWidth(col_index, 250)
-
+                
             tab.table2.auto_adjust_cells()
 
             tab.mark_saved()
