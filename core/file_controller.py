@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QMessageBox, QInputDialog, QDialog
 from ui.file_ui import FileUI
 from models import TestScenarioModel, ObjRepoModel
 from openpyxl.styles import Border, Side
+from openpyxl.utils import get_column_letter
 
 
 class FileController:
@@ -189,23 +190,36 @@ class FileController:
                 )
             with pd.ExcelWriter(scenario_path, engine="openpyxl") as writer:
                 if not tab.model1.df.empty:
-                    tab.model1.df.to_excel(
-                        writer, sheet_name="TestScenario",
-                        index=False, header=False
-                    )
+                    tab.model1.df.to_excel(writer, sheet_name="TestScenario", index=False, header=False)
                     worksheet = writer.sheets["TestScenario"]
+
+                    column_widths = {}
                     for row in worksheet.iter_rows():
                         for cell in row:
                             cell.border = thin_border
+                            length = len(str(cell.value or ''))
+                            if cell.column not in column_widths or length > column_widths[cell.column]:
+                                column_widths[cell.column] = length
+
+                    for col_idx, max_len in column_widths.items():
+                        worksheet.column_dimensions[get_column_letter(col_idx)].width = max_len
+
+
             with pd.ExcelWriter(obj_path, engine="openpyxl") as writer:
                 if not tab.model2.df.empty:
-                    tab.model2.df.to_excel(
-                        writer, sheet_name="Objects",
-                        index=False, header=False
-                    )
+                    tab.model2.df.to_excel(writer, sheet_name="Objects", index=False, header=False)
                     worksheet = writer.sheets["Objects"]
+
+                    column_widths = {}
                     for row in worksheet.iter_rows():
                         for cell in row:
                             cell.border = thin_border
+                            length = len(str(cell.value or ''))
+                            if cell.column not in column_widths or length > column_widths[cell.column]:
+                                column_widths[cell.column] = length
+
+                    for col_idx, max_len in column_widths.items():
+                        worksheet.column_dimensions[get_column_letter(col_idx)].width = max_len
+
         except Exception as e:
             raise Exception(f"Failed to write Excel files: {str(e)}")
