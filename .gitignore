@@ -7,4 +7,5 @@
     .gemini/
     .ruff_cache/
     .venv/
+    build/
     
