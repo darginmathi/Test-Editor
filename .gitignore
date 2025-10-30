@@ -1,11 +1,14 @@
     # .gitignore
     venv/
+    .venv/
     __pycache__/
     *.pyc
     .env
+
     GEMINI.md
     .gemini/
     .ruff_cache/
-    .venv/
+
     build/
-    dist/    
+    dist/
+    *.spec
