@@ -5,6 +5,7 @@ import pandas as pd
 from PyQt6.QtWidgets import QMessageBox, QInputDialog, QDialog
 from ui.file_ui import FileUI
 from models import TestScenarioModel, ObjRepoModel
+from openpyxl.styles import Border, Side
 
 
 class FileController:
@@ -86,7 +87,7 @@ class FileController:
             scenario_table_view.setColumnWidth(6, 250) # Command
             for col_index in range(7, 12):
                 scenario_table_view.setColumnWidth(col_index, 250)
-                
+
             tab.table2.auto_adjust_cells()
 
             tab.mark_saved()
@@ -180,17 +181,31 @@ class FileController:
         if not tab:
             return
         try:
-            with pd.ExcelWriter(scenario_path, engine="openpyxl") as Writer:
+            thin_border = Border(
+                left=Side(style='thin'),
+                right=Side(style='thin'),
+                top=Side(style='thin'),
+                bottom=Side(style='thin')
+                )
+            with pd.ExcelWriter(scenario_path, engine="openpyxl") as writer:
                 if not tab.model1.df.empty:
                     tab.model1.df.to_excel(
-                        Writer, sheet_name="TestScenario",
+                        writer, sheet_name="TestScenario",
                         index=False, header=False
                     )
-            with pd.ExcelWriter(obj_path, engine="openpyxl") as Writer:
+                    worksheet = writer.sheets["TestScenario"]
+                    for row in worksheet.iter_rows():
+                        for cell in row:
+                            cell.border = thin_border
+            with pd.ExcelWriter(obj_path, engine="openpyxl") as writer:
                 if not tab.model2.df.empty:
                     tab.model2.df.to_excel(
-                        Writer, sheet_name="Objects",
+                        writer, sheet_name="Objects",
                         index=False, header=False
                     )
+                    worksheet = writer.sheets["Objects"]
+                    for row in worksheet.iter_rows():
+                        for cell in row:
+                            cell.border = thin_border
         except Exception as e:
             raise Exception(f"Failed to write Excel files: {str(e)}")
