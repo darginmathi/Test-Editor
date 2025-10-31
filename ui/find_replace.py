@@ -31,18 +31,20 @@ class FindReplace(QDialog):
         self.replace_all_btn = QPushButton("Replace All", self)
         self.close_btn = QPushButton("Close", self)
 
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.find_prev_btn)
-        button_layout.addWidget(self.find_next_btn)
-        button_layout.addStretch()
-        layout.addLayout(button_layout, 3, 0, 1, 2)
+        button_grid = QGridLayout()
+        button_grid.addWidget(self.find_prev_btn, 0, 0)
+        button_grid.addWidget(self.find_next_btn, 0, 1)
 
-        button_layout = QHBoxLayout()
-        button_layout.addWidget(self.replace_btn)
-        button_layout.addWidget(self.replace_all_btn)
-        button_layout.addWidget(self.close_btn)
-        button_layout.addStretch()
-        layout.addLayout(button_layout, 4, 0, 1, 2)
+        button_grid.addWidget(self.replace_btn, 1, 0)
+        button_grid.addWidget(self.replace_all_btn, 1, 1)
+
+        button_grid.addWidget(self.close_btn, 2, 1)
+
+        button_wrapper = QHBoxLayout()
+        button_wrapper.addLayout(button_grid)
+        #button_wrapper.addStretch()
+
+        layout.addLayout(button_wrapper, 3, 0, 1, 2)
 
         self.find_prev_btn.clicked.connect(self.on_find_prev)
         self.find_next_btn.clicked.connect(self.on_find_next)

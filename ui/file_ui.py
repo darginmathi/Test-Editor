@@ -57,7 +57,7 @@ class FileUI(QDialog):
     def _create_projects_panel(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.addWidget(QLabel("Projects:"))
+        layout.addWidget(QLabel("Projects"))
 
         self.projects_list = QListWidget()
         self.projects_list.itemSelectionChanged.connect(self._on_project_selected)
@@ -68,7 +68,7 @@ class FileUI(QDialog):
     def _create_modules_panel(self):
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.addWidget(QLabel("Modules:"))
+        layout.addWidget(QLabel("Modules"))
 
         self.modules_list = QListWidget()
         self.modules_list.itemSelectionChanged.connect(self._on_module_selected)
@@ -76,7 +76,7 @@ class FileUI(QDialog):
 
         self.status = QLabel("")
         self.status.setStyleSheet(
-            "padding: 10px; background-color: #f0f0f0; border: 1px solid #ccc;"
+            "padding: 10px; border-radius: 4px; border: 1px solid #ccc;"
         )
         self.status.setMinimumHeight(50)
         self.status.setMaximumHeight(50)
@@ -220,7 +220,7 @@ class FileUI(QDialog):
 
     def _reset_status(self):
         self.status.setText("Select a test scenario")
-        self.status.setStyleSheet("padding: 10px; background-color: #f0f0f0; border: 1px solid #ccc;")
+        self.status.setStyleSheet("padding: 10px; border-radius: 4px; border: 1px solid #ccc;")
 
     def _set_action_button_state(self, enabled):
         if self.mode == "open" and hasattr(self, "open_btn"):
@@ -234,8 +234,7 @@ class FileUI(QDialog):
         if self.mode == "open":
             self.status.setText("Matching object file found")
             self.status.setStyleSheet(
-                "padding: 10px; background-color: #e8f5e8; "
-                "border: 1px solid #4caf50; color: #2e7d32;"
+                "padding: 10px; border-radius: 4px; border: 1px solid #4caf50; color: #2e7d32;"
             )
         else:
             self._reset_status()
@@ -248,8 +247,7 @@ class FileUI(QDialog):
             f"Expected: ObjRep_Module_{module_name}_Test.xlsx not found"
         )
         self.status.setStyleSheet(
-            "padding: 10px; background-color: #fff3cd; "
-            "border: 1px solid #ffc107; color: #856404;"
+            "padding: 10px; border-radius: 4px; border: 1px solid #ffc107; color: #856404;"
         )
 
         if self.mode == "open":

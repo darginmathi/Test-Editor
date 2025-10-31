@@ -1,19 +1,20 @@
 THEMES = {
     "dark": {
         "BG_DARK": "hsl(0, 0%, 0%)",
-        "BG": "hsl(0, 0%, 5%)",
-        "BG_LIGHT": "hsl(0, 0%, 10%)",
+        "BG": "hsl(0, 0%, 10%)",
+        "BG_LIGHT": "hsl(0, 0%, 20%)",
         "TEXT": "hsl(0, 0%, 95%)",
         "TEXT_MUTED": "hsl(0, 0%, 70%)",
         "HIGHLIGHT": "hsl(0, 0%, 40%)",
         "BORDER": "hsl(0, 0%, 30%)",
         "BORDER_MUTED": "hsl(0, 0%, 20%)",
-        "PRIMARY": "hsl(206, 100%, 65%)",
-        "SECONDARY": "hsl(40, 100%, 37%)",
-        "DANGER": "hsl(7, 100%, 66%)",
-        "WARNING": "hsl(45, 100%, 90%)",
-        "SUCCESS": "hsl(120, 41%, 94%)",
-        "INFO": "hsl(217, 100%, 70%)",
+        "SHADOW": "hsl(0, 0%, 30%)",
+        "PRIMARY": "hsl(210, 0%, 10%)",
+        "SECONDARY": "hsl(270, 30%, 60%)",
+        "DANGER": "hsl(0, 70%, 60%)",
+        "WARNING": "hsl(35, 90%, 60%)",
+        "SUCCESS": "hsl(140, 50%, 55%)",
+        "INFO": "hsl(190, 70%, 60%)"
     },
     "light": {
         "BG_DARK": "hsl(0, 0%, 95%)",
@@ -22,14 +23,15 @@ THEMES = {
         "TEXT": "hsl(0, 0%, 5%)",
         "TEXT_MUTED": "hsl(0, 0%, 30%)",
         "HIGHLIGHT": "hsl(0, 0%, 60%)",
-        "BORDER": "hsl(0, 0%, 700%)",
+        "BORDER": "hsl(0, 0%, 70%)",
         "BORDER_MUTED": "hsl(0, 0%, 80%)",
-        "PRIMARY": "hsl(206, 100%, 65%)",
-        "SECONDARY": "hsl(40, 100%, 37%)",
-        "DANGER": "hsl(7, 100%, 66%)",
-        "WARNING": "hsl(53, 100%, 70%)",
-        "SUCCESS": "hsl(162, 100%, 22%)",
-        "INFO": "hsl(217, 100%, 70%)",
+        "SHADOW": "hsl(0, 0%, 30%)",
+        "PRIMARY": "hsla(210, 80%, 60%, 0.15)",
+        "SECONDARY": "hsla(270, 30%, 60%, 0.15)",
+        "DANGER": "hsla(0, 70%, 60%, 0.15)",
+        "WARNING": "hsla(35, 90%, 60%, 0.15)",
+        "SUCCESS": "hsla(140, 50%, 55%, 0.15)",
+        "INFO": "hsla(190, 70%, 60%, 0.15)"
     }
 }
 
@@ -42,26 +44,27 @@ def get_stylesheet(theme_name="dark"):
         font-family: "Segoe UI", "Calibri", "Arial";
         font-size: 16px;
         color: {colors["TEXT_MUTED"]};
-        background-color: {colors["BG"]};
+        background-color: {colors["BG_DARK"]};
     }}
 
     /* Menu Bar */
     QMenuBar {{
-        background-color: {colors["BG_DARK"]};
-        border-bottom: 1px solid {colors["BORDER"]};
-        padding: 2px;
     }}
 
     QMenuBar::item {{
+        border: none;
         background-color: transparent;
-        padding: 4px 12px;
-        border: 1px solid transparent;
+        padding: 2px 8px;
         color: {colors["TEXT"]};
     }}
 
     QMenuBar::item:selected {{
         background-color: {colors["BG_LIGHT"]};
-        border: 1px solid {colors["BORDER"]};
+        border-radius: 4px;
+    }}
+
+    QMenuBar::item:pressed {{
+        background-color: {colors["BG"]};
     }}
 
     /* Dropdown Menus */
@@ -69,17 +72,22 @@ def get_stylesheet(theme_name="dark"):
         background-color: {colors["BG_DARK"]};
         border: 1px solid {colors["BORDER"]};
         padding: 1px;
-        border-radius: 0px;
+        border-radius: 4px;
     }}
 
     QMenu::item {{
         padding: 4px 24px 4px 28px;
         background-color: transparent;
+        border-radius: 4px;
         color: {colors["TEXT"]};
     }}
 
     QMenu::item:selected {{
-        background-color: {colors["BG_LIGHT"]};
+        background-color: {colors["BG"]};
+    }}
+
+    QMenu::item:pressed {{
+        background-color: {colors["BG_DARK"]};
     }}
 
     QMenu::separator {{
@@ -90,34 +98,40 @@ def get_stylesheet(theme_name="dark"):
 
     /* Table View */
     QTableView {{
+        background-color: {colors["BG_DARK"]};
         gridline-color: {colors["BORDER"]};
-        selection-background-color: {colors["BG_LIGHT"]};
-        border: 1px solid {colors["BORDER"]};
         outline: 0;
     }}
 
     QTableView::item:selected {{
-        background-color: {colors["BG_LIGHT"]};
+        background-color: {colors["PRIMARY"]};
         color: {colors["TEXT"]};
     }}
 
     QTableView QLineEdit {{
         color: {colors["TEXT"]};
-        background-color: {colors["BG"]};
-        border: 1px solid {colors["BG_LIGHT"]};
+        background-color: {colors["BG_DARK"]};
+        border: 1px solid {colors["BORDER"]};
+        border-radius: 4px;
         selection-color: {colors["TEXT"]};
-        selection-background-color: {colors["BG_LIGHT"]};
+        selection-background-color: {colors["PRIMARY"]};
+    }}
+
+    QTableView::item:focus {{
+        outline: 1px dotted {colors["TEXT"]};
+        outline-offset: -1px;
     }}
 
     /* Headers */
     QHeaderView::section {{
         background-color: {colors["BG_DARK"]};
-        padding: 4px;
         border: 1px solid {colors["BORDER"]};
+        padding: -2px -1px;
+        border-radius: 0px;
         border-top: none;
         border-left: none;
-        font-weight: normal;
         color: {colors["TEXT"]};
+        border-bottom: 1px solid {colors["BORDER_MUTED"]};
     }}
 
     QHeaderView::section:last {{
@@ -128,9 +142,10 @@ def get_stylesheet(theme_name="dark"):
     QPushButton {{
         background-color: {colors["BG_DARK"]};
         border: 1px solid {colors["BORDER"]};
-        padding: 4px 12px;
-        min-width: 75px;
-        min-height: 24px;
+        border-radius: 4px;
+        padding: 3px 8px;
+        min-width: 60px;
+        min-height: 20px;
         color: {colors["TEXT"]};
     }}
 
@@ -163,9 +178,14 @@ def get_stylesheet(theme_name="dark"):
         background-color: {colors["BG"]};
     }}
 
+    QStatusBar::item {{
+    border: none;
+    }}
+
     /* Input Fields */
     QLineEdit, QTextEdit {{
         border: 1px solid {colors["BORDER"]};
+        border-radius: 4px;
         padding: 2px 4px;
         selection-background-color: {colors["BG_LIGHT"]};
         background-color: {colors["BG_DARK"]};
@@ -178,27 +198,26 @@ def get_stylesheet(theme_name="dark"):
 
     /* Scrollbars */
     QScrollBar:vertical {{
-        border: none; /* Remove default border */
+        border: none;
         border-left: 1px solid {colors["BORDER"]};
-        background-color: {colors["BG"]};
+        background-color: {colors["BG_DARK"]};
         width: 16px;
         margin: 0px;
     }}
 
     QScrollBar::handle:vertical {{
-        background-color: {colors["HIGHLIGHT"]}; /* The handle (40% grey) */
+        background-color: {colors["HIGHLIGHT"]};
         min-height: 20px;
-        margin: 2px 4px; /* Give it some horizontal padding */
-        border-radius: 4px; /* Rounded corners */
+        margin: 2px 4px;
+        border-radius: 6px;
     }}
 
-    /* This styles the track *above* the handle */
     QScrollBar::sub-page:vertical {{
-        background-color: {colors["BG_DARK"]}; /* The track background (0% black) */
+        background-color: {colors["BG_DARK"]};
     }}
-    /* This styles the track *below* the handle */
+
     QScrollBar::add-page:vertical {{
-        background-color: {colors["BG_DARK"]}; /* The track background (0% black) */
+        background-color: {colors["BG_DARK"]};
     }}
 
     /* Hide the top/bottom arrow buttons */
@@ -211,7 +230,7 @@ def get_stylesheet(theme_name="dark"):
     QScrollBar:horizontal {{
         border: none;
         border-top: 1px solid {colors["BORDER"]};
-        background-color: {colors["BG"]};
+        background-color: {colors["BG_DARK"]};
         height: 16px;
         margin: 0px;
     }}
@@ -219,12 +238,12 @@ def get_stylesheet(theme_name="dark"):
     QScrollBar::handle:horizontal {{
         background-color: {colors["HIGHLIGHT"]};
         min-width: 20px;
-        margin: 4px 2px; /* Give it some vertical padding */
+        margin: 4px 2px;
         border-radius: 4px;
     }}
 
     QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
-        background-color: {colors["BG_DARK"]}; /* The track background (0% black) */
+        background-color: {colors["BG_DARK"]};
     }}
 
     QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
@@ -234,23 +253,29 @@ def get_stylesheet(theme_name="dark"):
     }}
 
     /* Tab Widget */
+    QTabWidget {{
+        background-color: {colors["BG_DARK"]};
+    }}
+
     QTabWidget::pane {{
         border: 1px solid {colors["BORDER"]};
         top: -1px;
     }}
 
     QTabBar::tab {{
-        background-color: {colors["BG_DARK"]};
+        background-color: {colors["BG"]};
         border: 1px solid {colors["BORDER"]};
-        border-bottom: none;
-        padding: 4px 12px;
-        margin-right: 1px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        padding: 3px 8px;
+        margin-right: 0px;
+        min-height: 20px;
         color: {colors["TEXT_MUTED"]};
     }}
 
     QTabBar::tab:selected {{
-        background-color: {colors["BG"]};
-        border-bottom: 1px solid {colors["BG"]};
+        background-color: {colors["BG_DARK"]};
+        border-bottom: 1px solid {colors["BG_DARK"]};
         color: {colors["TEXT"]};
     }}
 
@@ -270,31 +295,23 @@ def get_stylesheet(theme_name="dark"):
     QLabel#StatusLabel {{
         padding-left: 10px;
         padding-right: 10px;
-        border-radius: 3px;
+        border-radius: 4px;
     }}
 
     QLabel#StatusLabel[message_type="info"] {{
-        background-color: {colors["INFO"]};
-        color: {colors["BG"]};
-        border: 1px solid {colors["BORDER"]};
+        color: {colors["INFO"]};
     }}
 
     QLabel#StatusLabel[message_type="success"] {{
-        background-color: {colors["SUCCESS"]};
-        color: {colors["BG"]};
-        border: 1px solid {colors["BORDER"]};
+        color: {colors["SUCCESS"]};
     }}
 
     QLabel#StatusLabel[message_type="warning"] {{
-        background-color: {colors["WARNING"]};
-        color: {colors["BG"]};
-        border: 1px solid {colors["BORDER"]};
+        color: {colors["WARNING"]};
     }}
 
     QLabel#StatusLabel[message_type="error"] {{
-        background-color: {colors["DANGER"]};
-        color: {colors["BG"]};
-        border: 1px solid {colors["BORDER"]};
+        color: {colors["DANGER"]};
     }}
 
         /* Welcome Screen Styles */
@@ -315,5 +332,31 @@ def get_stylesheet(theme_name="dark"):
         margin-top: 30px;
         line-height: 1.5;
         padding-left: 80px;
+    }}
+
+    /* List Widgets */
+    QListWidget {{
+        background-color: {colors["BG_DARK"]};
+        border: 1px solid {colors["BORDER"]};
+        border-radius: 4px;
+        outline: none;
+    }}
+
+    QListWidget::item:selected {{
+        background-color: {colors["BG_LIGHT"]};
+        color: {colors["TEXT"]};
+    }}
+
+    QListWidget::item:hover:!selected {{
+         background-color: {colors["BORDER"]};
+         color: {colors["TEXT"]};
+    }}
+
+    /* Make the splitter handle invisible */
+    QSplitter::handle {{
+        border: none;
+        width: 0px;
+        image: none;
+        background-color: transparent;
     }}
 """
