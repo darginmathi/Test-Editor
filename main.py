@@ -6,7 +6,7 @@ from ui.styles import get_stylesheet
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Test Case Editor")
-    app.setApplicationVersion("0.2")
+    app.setApplicationVersion("0.3.0")
     style_sheet = get_stylesheet()
     app.setStyleSheet(style_sheet)
     editor = MainWindow()
