@@ -463,6 +463,29 @@ class MainWindow(QMainWindow):
         current_tab.undo_stack.endMacro()
         self.show_status_message(f"Replaced {len(matches)} occurrences.", "success", 3000)
 
+    def closeEvent(self, event):
+        unsaved_tabs = []
+        for i in range(self.main_tab.count()):
+            widget = self.main_tab.widget(i)
+            if isinstance(widget, TabWidget) and not widget.undo_stack.isClean():
+                unsaved_tabs.append(widget)
+
+        if unsaved_tabs:
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setText("You have unsaved changes.")
+            msg_box.setInformativeText("Do you want to discard your changes and exit?")
+            discard_button = msg_box.addButton("Discard", QMessageBox.ButtonRole.DestructiveRole)
+            cancel_button = msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+            msg_box.setDefaultButton(cancel_button)
+            msg_box.exec()
+
+            if msg_box.clickedButton() == discard_button:
+                event.accept()
+            else:
+                event.ignore()
+        else:
+            event.accept()
 
 
 
