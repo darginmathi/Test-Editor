@@ -2,7 +2,8 @@ name: Build and Release
 
 on:
   push:
-    tags: ['v*']  # Trigger when you push tags like v1.0.0, v1.1.0
+    tags: ['v*']
+  workflow_dispatch:
 
 jobs:
   build-windows:
