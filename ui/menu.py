@@ -57,20 +57,28 @@ class MenuBar(QMenuBar):
 
         file_menu.addSeparator()
 
-        select_cmd_action = QAction("Select Command File...", self.main)
-        select_cmd_action.triggered.connect(self.main.select_command_file)
-        file_menu.addAction(select_cmd_action)
-
     def _create_edit_menu(self, menubar):
         edit_menu = menubar.addMenu("Edit")
         edit_menu.addAction(self.main.undo_action)
         edit_menu.addAction(self.main.redo_action)
 
         edit_menu.addSeparator()
+        generate_action = QAction("Generate Test Cases", self.main)
+        generate_action.triggered.connect(self.generate_test_cases_action)
+        edit_menu.addAction(generate_action)
+
+        edit_menu.addSeparator()
         find_action = QAction("Find/Replace", self.main)
         find_action.setShortcut(QKeySequence.StandardKey.Find)
         find_action.triggered.connect(self.main._show_find_dialog)
         edit_menu.addAction(find_action)
+
+    def generate_test_cases_action(self):
+        current_tab = self.main.get_current_tab()
+        if current_tab and hasattr(current_tab, 'controller'):
+            current_table = self.main.get_current_table()
+            if current_table:
+                current_tab.controller.generate_test_cases(current_table.model)
 
     def auto_adjust_cells(self):
         table = self.main.get_current_table()

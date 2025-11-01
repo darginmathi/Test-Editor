@@ -1,3 +1,5 @@
+#    Muted Red (`#E57373`): hsl(0, 58%, 68%)
+#    Muted Blue (`#64B5F6`): hsl(207, 86%, 68%)
 THEMES = {
     "dark": {
         "BG_DARK": "hsl(0, 0%, 0%)",

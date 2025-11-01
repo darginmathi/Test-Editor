@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView)
-from PyQt6.QtCore import Qt, QTimer, QSettings, QModelIndex
+from PyQt6.QtCore import Qt, QTimer, QModelIndex
 from PyQt6.QtGui import QAction, QKeySequence
 
 import re
@@ -34,9 +34,6 @@ class MainWindow(QMainWindow):
         self.file_ops = FileController(self)
         self.create_undo_redo()
         self.command_manager = CommandManager()
-        settings = QSettings("TestEditor", "Settings")
-        saved_path = settings.value(self.command_manager.SETTINGS_KEY, "")
-        self.command_manager.load_commands(saved_path)
         self.command_manager.commandsReloaded.connect(self._update_delegates_command_list)
 
         self.menu_bar = MenuBar(self)
@@ -71,10 +68,6 @@ class MainWindow(QMainWindow):
         index = self.main_tab.addTab(tab, "")
         self.main_tab.setCurrentIndex(index)
         tab.update_tab_text()
-        '''if project_name:
-            self.setWindowTitle(f"Test Case Editor - {project_name} | {module_name}")
-        else:
-            self.setWindowTitle(f"Test Case Editor - {module_name}")'''
         self.setWindowTitle("Test Case Editor")
         self.on_tab_changed(index)
         return tab
@@ -108,7 +101,7 @@ class MainWindow(QMainWindow):
             except TypeError:
                 pass
             try:
-                self.current_connected_stack.canUndoChanged.disconnect(self.undo_action.setEnabled)
+                self.current_connected_stack.canUndoChanged.disconnect(self.redo_action.setEnabled)
             except TypeError:
                 pass
             try:
@@ -217,12 +210,6 @@ class MainWindow(QMainWindow):
         self.center_status_label.setText(message)
         self.center_status_label.show()
         QTimer.singleShot(timeout, self.center_status_label.hide)
-
-    def select_command_file(self):
-        if self.command_manager.command_file_prompt(self):
-            self.show_status_message("Command file reloaded successfully.", "success", 3000)
-        else:
-             self.show_status_message("Command file selection cancelled or failed.", "warning", 3000)
 
     def zoom_in(self):
         self.change_zoom(2)
