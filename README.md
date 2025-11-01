@@ -71,13 +71,10 @@ This project uses the following major libraries:
 ## Getting Started
 
 ### Setting Up
-- **Files -> Select Command File**
-    > Select the commands (`.xlsx`) file from menu.
-
 - **Files -> Open Files**
-    > Select the data directory
+    > Select the data directory.
 
-- **Use the built-in file explorer** to navigate to your project folder
+- **Use the built-in file explorer** to navigate to your project folder.
     > Expected Project structure:
     ```
     data/
@@ -89,15 +86,17 @@ This project uses the following major libraries:
             └── ObjRep_Module_<your_module>_Test.xlsx
     ```
 
-
 - **Files -> Open File**
-    > Open an existing TestSuit/ObjectRepository (`.xlsx`) combo
+    > Open an existing TestSuit/ObjectRepository (`.xlsx`) combo.
 
 - **Files -> New File**
-    > Create New TestSuit/ObjectRepository (`.xlsx`) combo with preset
+    > Create New TestSuit/ObjectRepository (`.xlsx`) combo with preset.
 
 - Start editing with the intuitive spreadsheet interface
-- Use the multi-tab feature to work on multiple test files simultaneously
+- Use the multi-tab feature to work on multiple test files simultaneously.
+
+- **Edit -> Generate Test Cases**
+    > Generate steps performed and expected result based on the command, object and value.
 
 ## Contributing
 We welcome contributions! Please feel free to submit pull requests, report bugs, or suggest new features.

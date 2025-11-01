@@ -6,57 +6,13 @@ from .steps_performed import get_steps_performed
 from .expected_results import get_expected_results
 from models.test_scenario import TestScenarioModel
 from .commands import COMMANDS
+from .utils import clean_object_name
 
 class TableController(QObject):
 
     def __init__(self, parent, undo_stack):
         super().__init__(parent)
         self.undo_stack = undo_stack
-
-    def generate_test_cases(self, model):
-        self.undo_stack.beginMacro("Generate Test Cases")
-        for row in range(model.rowCount()):
-            command_index = model.index(row, TestScenarioModel.COMMAND_COL)
-            command = model.data(command_index, Qt.ItemDataRole.DisplayRole)
-
-            if command in COMMANDS:
-                command_metadata = COMMANDS[command]
-                value1_col_name = command_metadata.get("value1")
-                value2_col_name = command_metadata.get("value2")
-
-                value1 = ""
-                if value1_col_name:
-                    value1_col_index = getattr(TestScenarioModel, value1_col_name)
-                    value1_index = model.index(row, value1_col_index)
-                    value1 = model.data(value1_index, Qt.ItemDataRole.DisplayRole)
-
-                value2 = ""
-                if value2_col_name:
-                    value2_col_index = getattr(TestScenarioModel, value2_col_name)
-                    value2_index = model.index(row, value2_col_index)
-                    value2 = model.data(value2_index, Qt.ItemDataRole.DisplayRole)
-
-                if command is None: command = ""
-                if value1 is None: value1 = ""
-                if value2 is None: value2 = ""
-
-                steps_performed_text = get_steps_performed(command, value1, value2)
-                expected_result_text = get_expected_results(command, value1, value2)
-
-                # Update 'Steps Performed' column
-                steps_performed_col_index = model.index(row, TestScenarioModel.STEPS_COL)
-                old_steps_performed = model.data(steps_performed_col_index, Qt.ItemDataRole.EditRole)
-                if steps_performed_text != old_steps_performed:
-                    command_obj = EditCellCommand(model, steps_performed_col_index, steps_performed_text, old_steps_performed)
-                    self.undo_stack.push(command_obj)
-
-                # Update 'Expected Result' column
-                expected_result_col_index = model.index(row, TestScenarioModel.EXPECTED_COL)
-                old_expected_result = model.data(expected_result_col_index, Qt.ItemDataRole.EditRole)
-                if expected_result_text != old_expected_result:
-                    command_obj = EditCellCommand(model, expected_result_col_index, expected_result_text, old_expected_result)
-                    self.undo_stack.push(command_obj)
-        self.undo_stack.endMacro()
 
     def insert_rows(self, model, position, count):
         command = InsertRowsCommand(model, position, count)
@@ -146,4 +102,45 @@ class TableController(QObject):
                 if str(old_value) != "":
                     command = EditCellCommand(model, index, "", old_value)
                     self.undo_stack.push(command)
+        self.undo_stack.endMacro()
+
+    def generate_test_cases(self, model):
+        self.undo_stack.beginMacro("Generate Test Cases")
+        for row in range(model.rowCount()):
+            steps_performed_index = model.index(row, TestScenarioModel.STEPS_COL)
+            expected_result_index = model.index(row, TestScenarioModel.EXPECTED_COL)
+
+            steps_performed_data = model.data(steps_performed_index, Qt.ItemDataRole.DisplayRole)
+            expected_result_data = model.data(expected_result_index, Qt.ItemDataRole.DisplayRole)
+
+            if not steps_performed_data and not expected_result_data:
+                command_index = model.index(row, TestScenarioModel.COMMAND_COL)
+                command = model.data(command_index, Qt.ItemDataRole.DisplayRole)
+
+                if command in COMMANDS:
+
+                    value1_index = model.index(row, TestScenarioModel.DATA1_COL)
+                    value1 = model.data(value1_index, Qt.ItemDataRole.DisplayRole)
+
+                    value2_index = model.index(row, TestScenarioModel.DATA2_COL)
+                    value2 = model.data(value2_index, Qt.ItemDataRole.DisplayRole)
+
+                    if value1 is None: value1 = ""
+                    if value2 is None: value2 = ""
+
+                    value1 = clean_object_name(value1)
+                    value2 = value2
+
+                    steps_performed_text = get_steps_performed(command, value1, value2)
+                    expected_result_text = get_expected_results(command, value1, value2)
+
+                    old_steps_performed = model.data(steps_performed_index, Qt.ItemDataRole.EditRole)
+                    if steps_performed_text != old_steps_performed:
+                        command_obj = EditCellCommand(model, steps_performed_index, steps_performed_text, old_steps_performed)
+                        self.undo_stack.push(command_obj)
+
+                    old_expected_result = model.data(expected_result_index, Qt.ItemDataRole.EditRole)
+                    if expected_result_text != old_expected_result:
+                        command_obj = EditCellCommand(model, expected_result_index, expected_result_text, old_expected_result)
+                        self.undo_stack.push(command_obj)
         self.undo_stack.endMacro()

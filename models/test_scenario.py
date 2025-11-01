@@ -13,6 +13,9 @@ class TestScenarioModel(TableModel):
     EXPECTED_COL = 5
     COMMAND_COL = 6
     DATA1_COL = 7
+    DATA2_COL = 8
+    DATA3_COL = 9
+    DATA4_COL = 10
     DATA5_COL = 11
 
     def __init__(self, df: pd.DataFrame = None):

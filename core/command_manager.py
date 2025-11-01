@@ -6,7 +6,7 @@ class CommandManager(QObject):
 
     def __init__(self):
         super().__init__()
-        self.commands = sorted(list(COMMANDS.keys()))
+        self.commands = sorted(list(COMMANDS))
         self.commandsReloaded.emit(self.commands)
 
     def get_command_names(self):
