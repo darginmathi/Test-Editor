@@ -4,6 +4,23 @@ THEMES = {
         "BG": "hsl(0, 0%, 10%)",
         "BG_LIGHT": "hsl(0, 0%, 20%)",
         "TEXT": "hsl(0, 0%, 95%)",
+        "TEXT_MUTED": "hsl(0, 0%, 80%)",
+        "HIGHLIGHT": "hsl(0, 0%, 40%)",
+        "BORDER": "hsl(0, 0%, 30%)",
+        "BORDER_MUTED": "hsl(0, 0%, 20%)",
+        "SHADOW": "hsl(0, 0%, 30%)",
+        "PRIMARY": "hsl(210, 0%, 10%)",
+        "SECONDARY": "hsl(270, 30%, 60%)",
+        "DANGER": "hsl(0, 70%, 60%)",
+        "WARNING": "hsl(35, 90%, 60%)",
+        "SUCCESS": "hsl(140, 50%, 55%)",
+        "INFO": "hsl(190, 70%, 60%)"
+    },
+    "mdark": {
+        "BG_DARK": "hsl(0, 0%, 10%)",
+        "BG": "hsl(0, 0%, 0%)",
+        "BG_LIGHT": "hsl(0, 0%, 20%)",
+        "TEXT": "hsl(0, 0%, 95%)",
         "TEXT_MUTED": "hsl(0, 0%, 70%)",
         "HIGHLIGHT": "hsl(0, 0%, 40%)",
         "BORDER": "hsl(0, 0%, 30%)",
@@ -17,9 +34,9 @@ THEMES = {
         "INFO": "hsl(190, 70%, 60%)"
     },
     "light": {
-        "BG_DARK": "hsl(0, 0%, 95%)",
-        "BG": "hsl(0, 0%, 100%)",
-        "BG_LIGHT": "hsl(0, 0%, 100%)",
+        "BG_DARK": "hsl(0, 0%, 100%)",
+        "BG": "hsl(0, 0%, 95%)",
+        "BG_LIGHT": "hsl(0, 0%, 90%)",
         "TEXT": "hsl(0, 0%, 5%)",
         "TEXT_MUTED": "hsl(0, 0%, 30%)",
         "HIGHLIGHT": "hsl(0, 0%, 60%)",
@@ -125,17 +142,19 @@ def get_stylesheet(theme_name="dark"):
     /* Headers */
     QHeaderView::section {{
         background-color: {colors["BG_DARK"]};
-        border: 1px solid {colors["BORDER"]};
         padding: -2px -1px;
-        border-radius: 0px;
-        border-top: none;
-        border-left: none;
+        border: none;
         color: {colors["TEXT"]};
-        border-bottom: 1px solid {colors["BORDER_MUTED"]};
     }}
 
-    QHeaderView::section:last {{
-        border-right: 1px solid {colors["BORDER"]};
+    QHeaderView::section:horizontal {{
+    border-bottom: 1px solid {colors["BORDER"]};
+    /* border-right: 1px solid {colors["BORDER"]}; */
+    }}
+
+    QHeaderView::section:vertical {{
+    border-right: 1px solid {colors["BORDER"]};
+    /* border-bottom: 1px solid {colors["BORDER"]}; */
     }}
 
     /* Buttons */
@@ -196,7 +215,7 @@ def get_stylesheet(theme_name="dark"):
         border: 1px solid {colors["BG_LIGHT"]};
     }}
 
-    /* Scrollbars */
+        /* Scrollbars */
     QScrollBar:vertical {{
         border: none;
         border-left: 1px solid {colors["BORDER"]};
@@ -212,11 +231,15 @@ def get_stylesheet(theme_name="dark"):
         border-radius: 6px;
     }}
 
-    QScrollBar::sub-page:vertical {{
-        background-color: {colors["BG_DARK"]};
+    QScrollBar::handle:vertical:hover {{
+        background-color: {colors["BORDER"]};
     }}
 
-    QScrollBar::add-page:vertical {{
+    QScrollBar::handle:vertical:pressed {{
+        background-color: {colors["BORDER_MUTED"]};
+    }}
+
+    QScrollBar::sub-page:vertical, QScrollBar::add-page:vertical {{
         background-color: {colors["BG_DARK"]};
     }}
 
@@ -239,7 +262,15 @@ def get_stylesheet(theme_name="dark"):
         background-color: {colors["HIGHLIGHT"]};
         min-width: 20px;
         margin: 4px 2px;
-        border-radius: 4px;
+        border-radius: 6px;
+    }}
+
+    QScrollBar::handle:horizontal:hover {{
+        background-color: {colors["BORDER"]};
+    }}
+
+    QScrollBar::handle:horizontal:pressed {{
+        background-color: {colors["BORDER_MUTED"]};
     }}
 
     QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {{
@@ -250,6 +281,13 @@ def get_stylesheet(theme_name="dark"):
         width: 0px;
         border: none;
         background: none;
+    }}
+
+    /* Corner between scrollbars */
+    QScrollBar::corner {{
+        background-color: {colors["BG_DARK"]};
+        border-top: 1px solid {colors["BORDER"]};
+        border-left: 1px solid {colors["BORDER"]};
     }}
 
     /* Tab Widget */

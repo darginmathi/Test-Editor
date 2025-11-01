@@ -1,16 +1,18 @@
 from PyQt6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox,
-                             QCompleter)
+                             QCompleter, QStyleOptionViewItem, QApplication, QStyle)
 from PyQt6.QtCore import Qt, QModelIndex, QTimer, QStringListModel
+from PyQt6.QtGui import QColor, QPalette
 
 from core.undo_commands import EditCellCommand
 from models import TestScenarioModel, ObjRepoModel
 
 class ComboBoxDelegate(QStyledItemDelegate):
-    def __init__(self, parent, undo_stack, commands):
+    def __init__(self, parent, undo_stack, commands, colors):
         super().__init__(parent)
         self.parent_tab = parent
         self.undo_stack = undo_stack
         self.commands = commands
+        self.colors = colors
         self.cached_objects = []  # Cache for objects
         self.objects_dirty = True
 
@@ -50,12 +52,8 @@ class ComboBoxDelegate(QStyledItemDelegate):
                     editor.setCompleter(completer)
 
                 elif TestScenarioModel.DATA1_COL <= col <= TestScenarioModel.DATA1_COL + 4:
-                    obj_repo_model = self.parent_tab.model2
-                    objects = []
-                    if obj_repo_model and not obj_repo_model.df.empty:
-                        objects = obj_repo_model.df.iloc[:, ObjRepoModel.NAME_COL].dropna().astype(str).unique().tolist()
-                        objects.sort()
-
+                    objects = self._get_objects()
+                    if objects:
                         editor = QComboBox(parent)
                         editor.setEditable(True)
                         editor.addItems(objects)
@@ -172,3 +170,48 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
     def update_command_list(self, new_commands):
         self.commands = new_commands
+
+    def invalidate_objects_cache(self):
+        self.objects_dirty = True
+
+    def _get_objects(self):
+        if self.objects_dirty:
+            obj_repo_model = self.parent_tab.model2
+            if obj_repo_model and not obj_repo_model.df.empty:
+                self.cached_objects = obj_repo_model.df.iloc[:, ObjRepoModel.NAME_COL].dropna().astype(str).unique().tolist()
+                self.cached_objects.sort()
+            else:
+                self.cached_objects = []
+            self.objects_dirty = False
+        return self.cached_objects
+
+    def paint(self, painter, option, index):
+        if index.row() == 0:
+            super().paint(painter, option, index)
+            return
+
+        option = QStyleOptionViewItem(option)
+
+        final_color = option.palette.color(QPalette.ColorRole.Text)
+
+        model = index.model()
+        if isinstance(model, TestScenarioModel):
+            col = index.column()
+            value = index.data(Qt.ItemDataRole.DisplayRole)
+
+            if value:
+                if col == TestScenarioModel.COMMAND_COL:
+                    if value not in self.commands:
+                        final_color = QColor("#E57373")
+
+                elif TestScenarioModel.DATA1_COL <= col <= TestScenarioModel.DATA5_COL:
+                    objects = self._get_objects()
+                    if value not in objects:
+                        final_color = QColor("#64B5F6")
+
+        option.palette.setColor(QPalette.ColorRole.Text, final_color)
+        option.palette.setColor(QPalette.ColorRole.HighlightedText, final_color)
+
+        super().paint(painter, option, index)
+
+

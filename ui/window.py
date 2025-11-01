@@ -4,11 +4,12 @@ from PyQt6.QtGui import QAction, QKeySequence
 
 import re
 from .menu import MenuBar
-from core import FileController
 from .tab import TabWidget
-from models import TableModel
-from core.command_manager import CommandManager
 from .find_replace import FindReplace
+from .styles import THEMES
+from models import TableModel
+from core import FileController
+from core.command_manager import CommandManager
 from core.undo_commands import EditCellCommand
 
 
@@ -486,6 +487,9 @@ class MainWindow(QMainWindow):
                 event.ignore()
         else:
             event.accept()
+
+    def get_current_colors(self):
+        return THEMES.get("dark", THEMES["dark"])
 
 
 

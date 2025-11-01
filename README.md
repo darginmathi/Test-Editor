@@ -22,7 +22,6 @@ A user-friendly desktop application to edit test cases for keyword-driven testin
 *   **Light Mode:** Light theme option for different preferences.
 
 ## Known Issues
-*   **Save Prompt:** Closing application with unsaved files won't prompt for save.
 *   **Excel Coppatability:** Some files take longer than expected to load(suspect formating further testing required).
 
 ## Installation

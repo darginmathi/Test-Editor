@@ -25,8 +25,9 @@ class TabWidget(QWidget):
         self.model2 = ObjRepoModel()
 
         commands = self.main.command_manager.get_command_names()
+        colors = self.main.get_current_colors()
 
-        self.delegate = ComboBoxDelegate(self, self.undo_stack, commands)
+        self.delegate = ComboBoxDelegate(self, self.undo_stack, commands, colors)
 
         self.table1 = Table(model=self.model1, undo_stack=self.undo_stack, delegate=self.delegate)
         self.table2 = Table(model=self.model2, undo_stack=self.undo_stack, delegate=self.delegate)
@@ -64,6 +65,7 @@ class TabWidget(QWidget):
         self.table2.clearRequested.connect(lambda s: self.controller.clear(self.model2, s))
         self.model1.dataChanged.connect(self.update_tab_text)
         self.model2.dataChanged.connect(self.update_tab_text)
+        self.model2.dataChanged.connect(self.on_object_model_changed)
 
         self.undo_stack.cleanChanged.connect(self.update_tab_text)
 
@@ -122,3 +124,6 @@ class TabWidget(QWidget):
              self.delegate.update_command_list(commands)
         elif hasattr(self.delegate, 'commands'):
             self.delegate.commands = commands
+
+    def on_object_model_changed(self):
+        self.delegate.invalidate_objects_cache()
