@@ -1,8 +1,9 @@
 # Test Case Editor
 
+A user-friendly desktop application to edit test cases for keyword-driven testing frameworks like Selenium. No programming knowledge required!
+
 ![Test Case Editor Application](test_editor-sample-workspace.png)
 
-A user-friendly desktop application to edit test cases for keyword-driven testing frameworks like Selenium. No programming knowledge required!
 
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 
@@ -71,13 +72,13 @@ This project uses the following major libraries:
 
 ### Setting Up
 - **Files -> Select Command File**
-  > Select the commands (`.xlsx`) file from menu.
+    > Select the commands (`.xlsx`) file from menu.
 
 - **Files -> Open Files**
-  > Select the data directory
+    > Select the data directory
 
 - **Use the built-in file explorer** to navigate to your project folder
-  > Expected Project structure:
+    > Expected Project structure:
     ```
     data/
     ├── testSuits/
@@ -90,10 +91,10 @@ This project uses the following major libraries:
 
 
 - **Files -> Open File**
-> Open an existing TestSuit/ObjectRepository (`.xlsx`) combo
+    > Open an existing TestSuit/ObjectRepository (`.xlsx`) combo
 
 - **Files -> New File**
-> Create New TestSuit/ObjectRepository (`.xlsx`) combo with preset
+    > Create New TestSuit/ObjectRepository (`.xlsx`) combo with preset
 
 - Start editing with the intuitive spreadsheet interface
 - Use the multi-tab feature to work on multiple test files simultaneously
