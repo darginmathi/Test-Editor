@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableView, QHeaderView, QMenu
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableView, QHeaderView, QMenu, QInputDialog
 from PyQt6.QtCore import Qt, pyqtSignal, QItemSelection, QModelIndex
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 
@@ -128,18 +128,30 @@ class Table(QWidget):
             self.clearRequested.emit(selection)
 
     def insert_rows(self):
-        current_index = self.table.currentIndex()
         selection = self.table.selectionModel().selection()
-        if not selection.isEmpty():
-            rows = sorted(set(index.row() for index in selection.indexes()))
-            position = rows[0]
-            rows_to_insert = len(rows)
-        elif current_index.isValid():
-            position = current_index.row()
-            rows_to_insert = 1
-        else:
+
+        rows = sorted(set(index.row() for index in selection.indexes()))
+        num_rows = len(rows)
+        if num_rows < 1:
             return
-        self.insertRowsRequested.emit(position, rows_to_insert)
+        position = rows[0]
+
+        if num_rows > 1:
+            self.insertRowsRequested.emit(position, num_rows)
+        if num_rows == 1:
+            num, ok = QInputDialog.getInt(
+                self,
+                "Insert Rows",
+                "No. of Rows:",
+                1,
+                1,
+                100
+            )
+            if ok and num > 0:
+                rows_to_insert = num
+                self.insertRowsRequested.emit(position, rows_to_insert)
+            else:
+                return
 
     def delete_rows(self):
         selection = self.table.selectionModel().selection()

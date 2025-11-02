@@ -78,7 +78,13 @@ class MenuBar(QMenuBar):
         if current_tab and hasattr(current_tab, 'controller'):
             current_table = self.main.get_current_table()
             if current_table:
-                current_tab.controller.generate_test_cases(current_table.model)
+                num_generated = current_tab.controller.generate_test_cases(current_table.model)
+                if num_generated > 0:
+                    message = f"Generated {num_generated} test case(s)."
+                    self.main.show_status_message(message, "success", 5000)
+                else:
+                    message = f"No empty fields found to generate."
+                    self.main.show_status_message(message, "info", 5000)
 
     def auto_adjust_cells(self):
         table = self.main.get_current_table()

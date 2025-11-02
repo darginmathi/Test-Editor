@@ -186,31 +186,71 @@ class ComboBoxDelegate(QStyledItemDelegate):
         return self.cached_objects
 
     def paint(self, painter, option, index):
-        if index.row() == 0:
-            super().paint(painter, option, index)
-            return
-
+        model = index.model()
+        current_row = index.row()
+        current_col = index.column()
+        total_rows = model.rowCount()
         option = QStyleOptionViewItem(option)
+        is_special_row = False
+
+        if isinstance(model, TestScenarioModel):
+            if (current_row == 0 or
+                current_row == 1 or
+                current_row == total_rows - 1 or
+                current_row == total_rows - 2):
+                option.font.setBold(True)
+                is_special_row = True
+            elif current_col in [TestScenarioModel.COMMAND_COL, TestScenarioModel.DESC_COL, TestScenarioModel.SKIP_COL]:
+                option.font.setBold(True)
+            if current_col == TestScenarioModel.STEPS_COL:
+                value = model.data(index, Qt.ItemDataRole.DisplayRole)
+                if value in ["Scenario Started", "Scenario Ended"]:
+                    option.font.setBold(True)
+
+        elif isinstance(model, ObjRepoModel):
+            if (current_row == 0 or
+                current_row == total_rows - 1):
+                option.font.setBold(True)
+                is_special_row = True
 
         final_color = option.palette.color(QPalette.ColorRole.Text)
 
-        model = index.model()
-        if isinstance(model, TestScenarioModel):
-            col = index.column()
+        if not is_special_row and isinstance(model, TestScenarioModel):
             value = index.data(Qt.ItemDataRole.DisplayRole)
 
             if value:
-                if col == TestScenarioModel.COMMAND_COL:
+                if current_col == TestScenarioModel.COMMAND_COL:
                     if value not in self.commands:
                         final_color = QColor("#E57373")
 
-                elif TestScenarioModel.DATA1_COL <= col <= TestScenarioModel.DATA5_COL:
+                elif TestScenarioModel.DATA1_COL <= current_col <= TestScenarioModel.DATA5_COL:
                     objects = self._get_objects()
                     if value not in objects:
                         final_color = QColor("#64B5F6")
 
         option.palette.setColor(QPalette.ColorRole.Text, final_color)
         option.palette.setColor(QPalette.ColorRole.HighlightedText, final_color)
+
+        # if not is_special_row and isinstance(model, TestScenarioModel):
+        #     command_index = model.index(current_row, TestScenarioModel.COMMAND_COL)
+        #     command_value = model.data(command_index, Qt.ItemDataRole.DisplayRole)
+
+        #     if command_value == "StartScenario":
+        #         painter.save()
+        #         pen = painter.pen()
+        #         pen.setColor(QColor("#B0B0B0"))
+        #         pen.setWidth(1)
+        #         painter.setPen(pen)
+        #         painter.drawLine(option.rect.topLeft(), option.rect.topRight())
+        #         painter.restore()
+        #     if command_value == "EndScenario":
+        #         painter.save()
+        #         pen = painter.pen()
+        #         pen.setColor(QColor("#B0B0B0"))
+        #         pen.setWidth(1)
+        #         painter.setPen(pen)
+        #         painter.drawLine(option.rect.bottomLeft(), option.rect.bottomRight())
+        #         painter.restore()
 
         super().paint(painter, option, index)
 

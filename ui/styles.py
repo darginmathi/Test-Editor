@@ -60,7 +60,7 @@ def get_stylesheet(theme_name="dark"):
     return f"""
     /* Global */
     QWidget {{
-        font-family: "Segoe UI", "Calibri", "Arial";
+        font-family "Courier New", "Calibri", "Arial", sans-serif;
         font-size: 16px;
         color: {colors["TEXT_MUTED"]};
         background-color: {colors["BG_DARK"]};

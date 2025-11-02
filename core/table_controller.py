@@ -105,6 +105,7 @@ class TableController(QObject):
         self.undo_stack.endMacro()
 
     def generate_test_cases(self, model):
+        test_case_generated = 0
         self.undo_stack.beginMacro("Generate Test Cases")
         for row in range(model.rowCount()):
             steps_performed_index = model.index(row, TestScenarioModel.STEPS_COL)
@@ -138,9 +139,11 @@ class TableController(QObject):
                     if steps_performed_text != old_steps_performed:
                         command_obj = EditCellCommand(model, steps_performed_index, steps_performed_text, old_steps_performed)
                         self.undo_stack.push(command_obj)
+                        test_case_generated += 1
 
                     old_expected_result = model.data(expected_result_index, Qt.ItemDataRole.EditRole)
                     if expected_result_text != old_expected_result:
                         command_obj = EditCellCommand(model, expected_result_index, expected_result_text, old_expected_result)
                         self.undo_stack.push(command_obj)
         self.undo_stack.endMacro()
+        return test_case_generated
