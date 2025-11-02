@@ -1,5 +1,5 @@
 from PyQt6.QtCore import QObject, Qt
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QMessageBox
 
 from .undo_commands import EditCellCommand, InsertRowsCommand, DeleteRowsCommand
 from .steps_performed import get_steps_performed
@@ -10,8 +10,9 @@ from .utils import clean_object_name
 
 class TableController(QObject):
 
-    def __init__(self, parent, undo_stack):
-        super().__init__(parent)
+    def __init__(self, main, undo_stack):
+        super().__init__(main)
+        self.main  = main
         self.undo_stack = undo_stack
 
     def insert_rows(self, model, position, count):
@@ -67,9 +68,38 @@ class TableController(QObject):
         if not data:
             return
 
-        self.undo_stack.beginMacro("Paste")
+        overwrite = False
+
         start_row = start_index.row()
         start_col = start_index.column()
+
+        for i, row_data in enumerate(data):
+            for j, value in enumerate(row_data):
+                target_row = start_row + i
+                target_col = start_col + j
+                if (target_row < model.rowCount() and
+                    target_col < model.columnCount()):
+                    index = model.index(target_row, target_col)
+                    old_value = model.data(index, Qt.ItemDataRole.EditRole)
+
+                    if old_value is not None and str(old_value) != "" and str(value) != str(old_value):
+                        overwrite = True
+                        break
+            if overwrite:
+                break
+
+        if overwrite:
+            reply = QMessageBox.question(
+                self.main,
+                "Overwrite existing cells",
+                "This operation will overwrite existing data. Do you want to proceed?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No
+            )
+            if reply !=QMessageBox.StandardButton.Yes:
+                return
+
+        self.undo_stack.beginMacro("Paste")
 
         for i, row_data in enumerate(data):
             for j, value in enumerate(row_data):

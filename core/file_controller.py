@@ -110,6 +110,9 @@ class FileController:
                     try:
                         self._write_files(scenario_path, obj_path)
                         tab.mark_saved()
+
+                        self.main.show_status_message(f"Successfully saved {tab.project_name}/{tab.module_name}", "info", 5000)
+
                     except (FileNotFoundError, PermissionError) as e:
                         QMessageBox.critical(self.main, "Error", f"Permission denied or path not found when saving files:\n{str(e)}")
                         return False
@@ -168,6 +171,7 @@ class FileController:
             tab.obj_path = obj_path
             tab.project_name = ui.selected_project
             tab.mark_saved()
+            self.main.show_status_message(f"Successfully Saved{project_name}/{new_module_name}", "info", 5000)
             return True
 
         except Exception as e:

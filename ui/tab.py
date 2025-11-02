@@ -32,7 +32,7 @@ class TabWidget(QWidget):
         self.table1 = Table(model=self.model1, undo_stack=self.undo_stack, delegate=self.delegate)
         self.table2 = Table(model=self.model2, undo_stack=self.undo_stack, delegate=self.delegate)
 
-        self.controller = TableController(self, self.undo_stack)
+        self.controller = TableController(main, self.undo_stack)
 
         self.setup_ui()
         self.connect_signals()
