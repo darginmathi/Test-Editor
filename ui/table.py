@@ -40,6 +40,13 @@ class Table(QWidget):
         self.table.setAlternatingRowColors(False)
         self.table.setSortingEnabled(False)
 
+        self.model.rowsInserted.connect(self.merge_cells)
+        self.model.rowsRemoved.connect(self.merge_cells)
+        self.model.dataChanged.connect(self._on_data_changed_commands)
+        self.model.modelReset.connect(self.merge_cells)
+
+        self.merge_cells()
+
     def auto_adjust_cells(self):
         self.table.resizeColumnsToContents()
 
@@ -163,3 +170,42 @@ class Table(QWidget):
             return
         if rows:
             self.deleteRowsRequested.emit(rows)
+
+    def merge_cells(self):
+        self.table.clearSpans()
+
+        model = self.model
+        command_col = 6
+        desc_col = 3
+
+        blocks = []
+        start_row_stack = []
+
+        start_row = 3
+        end_row = model.rowCount() - 3
+        if end_row < start_row:
+            return
+
+        row = 3
+        for row in range(row, end_row):
+            command_index = model.index(row, command_col)
+            command = model.data(command_index, Qt.ItemDataRole.DisplayRole)
+
+            if command == "StartScenario":
+                start_row_stack.append(row)
+
+            elif command == "EndScenario":
+                if start_row_stack:
+                    start_row = start_row_stack.pop()
+                    blocks.append((start_row, row))
+
+        for start, end in blocks:
+            span_size = end - start + 1
+            if span_size > 1:
+                self.table.setSpan(start, desc_col, span_size, 1)
+
+    def _on_data_changed_commands(self, topLeft, bottomRight, roles):
+        command_col = 6
+
+        if topLeft.column() <= command_col <= bottomRight.column():
+            self.merge_cells()

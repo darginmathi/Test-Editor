@@ -58,7 +58,6 @@ class TableController(QObject):
 
         data = []
         for line in clipboard_text.split('\n'):
-            line = line.strip()
             if line:
                 if '\t' in line:
                     cells = line.split('\t')
