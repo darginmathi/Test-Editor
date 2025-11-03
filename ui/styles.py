@@ -54,7 +54,7 @@ THEMES = {
     }
 }
 
-def get_stylesheet(theme_name="light"):
+def get_stylesheet(theme_name="dark"):
     colors = THEMES.get(theme_name, THEMES["dark"])
 
     return f"""
