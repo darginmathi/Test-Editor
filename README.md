@@ -13,14 +13,16 @@ A user-friendly desktop application to edit test cases for keyword-driven testin
 * **Custom File Explorer:** Custom built file explorer to move through project files.
 * **Command Manager:** Cross-file Command(functions)/Objects retrieval with dropdown in table for ease of use.
 * **Auto Update ID:** Auto Update ID (when inserting or removing rows).
+* **Smart Cell Merging:** Automatically merges the 'Description' column for test case blocks between StartScenario and EndScenario commands.
 * **Clean UI:** Clean and professional Dark mode UI/Light mode in the works.
 * **Excel File Support:** Edit standard (`.xlsx`) test case files.
 
 ## Upcoming Features
 
 * **Run:** Run TestCases directly from editor.
-* **Test Step Generation Logic:** Command-based assistance.
 * **Light Mode:** Light theme option for different preferences.
+* **Command Argument validation:** Syntax Highlighting on commands to indicate required arguments met.
+* **Navigate to Object Definition** Scenario -> Object Repo jump for quick editing of objects.
 
 ## Known Issues
 
@@ -105,8 +107,6 @@ This project uses the following major libraries:
 * Start editing with the intuitive spreadsheet interface
 
 * Use the multi-tab feature to work on multiple test files simultaneously.
-
-* auto merge description cells based on commands "StartScenario" and "EndScenario"
 
 ## Contributing
 

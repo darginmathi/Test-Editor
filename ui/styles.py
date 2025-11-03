@@ -23,8 +23,8 @@ THEMES = {
         "BG": "hsl(0, 0%, 0%)",
         "BG_LIGHT": "hsl(0, 0%, 20%)",
         "TEXT": "hsl(0, 0%, 95%)",
-        "TEXT_MUTED": "hsl(0, 0%, 70%)",
-        "HIGHLIGHT": "hsl(0, 0%, 40%)",
+        "TEXT_MUTED": "hsl(0, 0%, 80%)",
+        "HIGHLIGHT": "hsl(0, 0%, 0%)",
         "BORDER": "hsl(0, 0%, 30%)",
         "BORDER_MUTED": "hsl(0, 0%, 20%)",
         "SHADOW": "hsl(0, 0%, 30%)",
@@ -39,8 +39,8 @@ THEMES = {
         "BG_DARK": "hsl(0, 0%, 100%)",
         "BG": "hsl(0, 0%, 95%)",
         "BG_LIGHT": "hsl(0, 0%, 90%)",
-        "TEXT": "hsl(0, 0%, 5%)",
-        "TEXT_MUTED": "hsl(0, 0%, 30%)",
+        "TEXT": "hsl(0, 0%, 0%)",
+        "TEXT_MUTED": "hsl(0, 0%, 10%)",
         "HIGHLIGHT": "hsl(0, 0%, 60%)",
         "BORDER": "hsl(0, 0%, 70%)",
         "BORDER_MUTED": "hsl(0, 0%, 80%)",
@@ -54,7 +54,7 @@ THEMES = {
     }
 }
 
-def get_stylesheet(theme_name="dark"):
+def get_stylesheet(theme_name="light"):
     colors = THEMES.get(theme_name, THEMES["dark"])
 
     return f"""
