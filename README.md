@@ -4,52 +4,57 @@ A user-friendly desktop application to edit test cases for keyword-driven testin
 
 ![Test Case Editor Application](test_editor-sample-workspace.png)
 
-
 ![License](https://img.shields.io/badge/license-GPL-blue.svg)
 
 ## Features
-*   **Basic Spreadsheet Suite:** All the basic spreadsheet editing features you are used to.
-*   **MultiTab Functionality:** MultiTab function to actively open and edit multiple tests.
-*   **Custom File Explorer:** Custom built file explorer to move through project files.
-*   **Command Manager:** Cross-file Command(functions)/Objects retrieval with dropdown in table for ease of use.
-*   **Auto Update ID:** Auto Update ID (when inserting or removing rows).
-*   **Clean UI:** Clean and professional Dark mode UI/Light mode in the works.
-*   **Excel File Support:** Edit standard (`.xlsx`) test case files.
+
+* **Basic Spreadsheet Suite:** All the basic spreadsheet editing features you are used to.
+* **MultiTab Functionality:** MultiTab function to actively open and edit multiple tests.
+* **Custom File Explorer:** Custom built file explorer to move through project files.
+* **Command Manager:** Cross-file Command(functions)/Objects retrieval with dropdown in table for ease of use.
+* **Auto Update ID:** Auto Update ID (when inserting or removing rows).
+* **Clean UI:** Clean and professional Dark mode UI/Light mode in the works.
+* **Excel File Support:** Edit standard (`.xlsx`) test case files.
 
 ## Upcoming Features
-*   **Run:** Run TestCases directly from editor.
-*   **Test Step Generation Logic:** Command-based assistance.
-*   **Light Mode:** Light theme option for different preferences.
+
+* **Run:** Run TestCases directly from editor.
+* **Test Step Generation Logic:** Command-based assistance.
+* **Light Mode:** Light theme option for different preferences.
 
 ## Known Issues
-*   **Excel Coppatability:** Some files take longer than expected to load(suspect formating further testing required).
+
+* **Excel Coppatability:** Some files take longer than expected to load(suspect formating further testing required).
 
 ## Installation
 
 ### Method 1: Download Ready-to-Run Executable (Recommended)
 
 1. **Go to the Releases Page:**
-   - Visit: [https://github.com/darginmathi/Test-Editor/releases](https://github.com/darginmathi/Test-Editor/releases)
+   * Visit: [https://github.com/darginmathi/Test-Editor/releases](https://github.com/darginmathi/Test-Editor/releases)
 
 2. **Download the Latest Version:**
-   - Look for the latest release (e.g., "v1.0.0").
-   - Under "Assets," click to download `TestEditor.exe`
+   * Look for the latest release (e.g., "v1.0.0").
+   * Under "Assets," click to download `TestEditor.exe`
 
 3. **Run the Application:**
-   - Double-click the downloaded `.exe` file
-   - If Windows shows a security warning, click "More info" and then "Run anyway"
+   * Double-click the downloaded `.exe` file
+   * If Windows shows a security warning, click "More info" and then "Run anyway"
 
 ### Method 2: For Advanced Users (Building from Source)
+
 If a pre-made .exe is not available, you can build it yourself using the instructions below.
 
 1. **Prerequisites:**
-    - [Python](https://www.python.org/)
+    * [Python](https://www.python.org/)
+
     ```bash
     pip install uv
     uv pip install pyinstaller
     ```
 
 2. **Build from Source:**
+
     ```bash
     git clone https://github.com/darginmathi/Test-Editor
     cd Test-Editor
@@ -64,19 +69,21 @@ If a pre-made .exe is not available, you can build it yourself using the instruc
 
 This project uses the following major libraries:
 
-*   [PyQt6](https://www.riverbankcomputing.com/static/Docs/PyQt6/)
-*   [pandas](https://pandas.pydata.org/)
-*   [openpyxl](https://openpyxl.readthedocs.io/en/stable/)
+* [PyQt6](https://www.riverbankcomputing.com/static/Docs/PyQt6/)
+* [pandas](https://pandas.pydata.org/)
+* [openpyxl](https://openpyxl.readthedocs.io/en/stable/)
 
 ## Getting Started
 
 ### Setting Up
-- **Files -> Open Files**
+
+* **Files -> Open Files**
     > Select the data directory.
 
-- **Use the built-in file explorer** to navigate to your project folder.
+* **Use the built-in file explorer** to navigate to your project folder.
     > Expected Project structure:
-    ```
+
+    ```file structure
     data/
     ├── testSuits/
     │   └── <yourproject>
@@ -86,20 +93,25 @@ This project uses the following major libraries:
             └── ObjRep_Module_<your_module>_Test.xlsx
     ```
 
-- **Files -> Open File**
+* **Files -> Open File**
     > Open an existing TestSuit/ObjectRepository (`.xlsx`) combo.
 
-- **Files -> New File**
+* **Files -> New File**
     > Create New TestSuit/ObjectRepository (`.xlsx`) combo with preset.
 
-- Start editing with the intuitive spreadsheet interface
-- Use the multi-tab feature to work on multiple test files simultaneously.
-
-- **Edit -> Generate Test Cases**
+* **Edit -> Generate Test Cases**
     > Generate steps performed and expected result based on the command, object and value.
 
+* Start editing with the intuitive spreadsheet interface
+
+* Use the multi-tab feature to work on multiple test files simultaneously.
+
+* auto merge description cells based on commands "StartScenario" and "EndScenario"
+
 ## Contributing
+
 We welcome contributions! Please feel free to submit pull requests, report bugs, or suggest new features.
 
 ## License
+
 This project is licensed under the GPL License - see the LICENSE file for details.

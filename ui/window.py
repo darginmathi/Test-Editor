@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self.resize(1600, 900)
         self.showMaximized()
 
-        self.current_font_size = 12
+        self.current_font_size = 16
         self.base_font_size = self.current_font_size
         self.current_connected_stack = None
         self.last_find_index = QModelIndex()

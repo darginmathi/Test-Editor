@@ -104,17 +104,16 @@ class TabWidget(QWidget):
         return True
 
     def apply_zoom(self, font_size):
-        current_font = self.font()
-        new_font = QFont(current_font)
-        new_font.setPointSize(font_size)
 
-        self.table1.table.setFont(new_font)
-        self.table2.table.setFont(new_font)
+        style = f"font-size: {font_size}px;"
 
-        self.table1.table.horizontalHeader().setFont(new_font)
-        self.table1.table.verticalHeader().setFont(new_font)
-        self.table2.table.horizontalHeader().setFont(new_font)
-        self.table2.table.verticalHeader().setFont(new_font)
+        self.table1.table.setStyleSheet(style)
+        self.table2.table.setStyleSheet(style)
+
+        self.table1.table.horizontalHeader().setStyleSheet(style)
+        self.table1.table.verticalHeader().setStyleSheet(style)
+        self.table2.table.horizontalHeader().setStyleSheet(style)
+        self.table2.table.verticalHeader().setStyleSheet(style)
 
         self.table1.auto_adjust_cells()
         self.table2.auto_adjust_cells()
