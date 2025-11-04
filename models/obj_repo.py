@@ -10,6 +10,18 @@ class ObjRepoModel(TableModel):
     XPATH_COL = 2
     LOCATOR_COL = 3
 
+    ABBRIVATION_MAP = {
+        "cel": "Cell",
+        "lnk": "Link",
+        "lbl": "Label",
+        "tgl": "Toggle",
+        "cir": "Circle",
+        "btn": "Button",
+        "txt": "TextBox",
+        "ddl": "DropDown",
+        "chk": "Checkbox"
+    }
+
     def __init__(self, df: pd.DataFrame = None):
         super().__init__(df=df)
 
@@ -22,6 +34,21 @@ class ObjRepoModel(TableModel):
             ["END", "", "", ""]
         ]
         return pd.DataFrame(data, columns=columns)
+
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
+        if not index.isValid():
+            return False
+
+        result = super().setData(index, value, role)
+
+        if result and role == Qt.ItemDataRole.EditRole and index.column() == self.NAME_COL:
+            for abbr, full_type in self.ABBRIVATION_MAP.items():
+                if value.startswith(abbr):
+                    type_index = self.index(index.row(), self.TYPE_COL)
+                    super().setData(type_index, full_type, role)
+                    break
+        return result
+
 
     def insertRows(self, position, rows, parent=QModelIndex()):
         success = super().insertRows(position, rows, parent)
