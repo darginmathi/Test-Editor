@@ -114,6 +114,7 @@ class FileUI(QDialog):
             self.data_directory = last_dir
             self.dir_label.setText(last_dir)
             self._populate_projects()
+            self._load_last_project()
 
     def _save_last_directory(self):
         if self.data_directory:
@@ -127,6 +128,21 @@ class FileUI(QDialog):
             self.dir_label.setText(directory)
             self._save_last_directory()
             self._populate_projects()
+            self._load_last_project()
+
+    def _load_last_project(self):
+        if self.mode != "open":
+            return
+        settings = QSettings("TestEditor", "Settings")
+        last_project = settings.value("last_project", "")
+        if not last_project:
+            return
+
+        for i in range(self.projects_list.count()):
+            item = self.projects_list.item(i)
+            if item.text() == last_project:
+                self.projects_list.setCurrentItem(item)
+                break
 
     # Dir Data Population
 
@@ -263,6 +279,11 @@ class FileUI(QDialog):
         if not os.path.exists(self.selected_scenario_path) or not os.path.exists(self.selected_obj_path):
             QMessageBox.warning(self, "Error", "One or more files no longer exist")
             return
+
+        if self.projects_list.selectedItems():
+            settings = QSettings("TestEditor", "Settings")
+            last_project = self.projects_list.selectedItems()[0].text()
+            settings.setValue("last_project", last_project)
 
         self.accept()
 

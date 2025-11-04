@@ -149,7 +149,7 @@ STEPS_PERFORMED = {
     "EC_COMPAREDERIVEDTOAGGREGATE": "Compare derived value {value1} to aggregate value {value2}",
     "EC_CHECKBUTTONNOTCLICKABLE": "Check button {value1} is not clickable",
     "EC_COMPAREBIDOFFERPRICES": "Compare bid and offer prices for {value1} and {value2}",
-    "EC_HANDLEPOPUPS": "Handle popups with button {value1}",
+    "EC_HANDLEPOPUPS": "Handle popup",
     "EC_SETINVALIDVALUESINDROPDOWN": "Attempt to set invalid value(s) in {value1} dropdown",
     "EC_SETVOLTEXTBOX": "Set {value2} in {value1} vol textbox",
     "EC_RESETBIDOFFERVERIFICATION": "Verify bid/offer reset for cells {value1} with expected bids {value2}",

@@ -147,7 +147,7 @@ EXPECTED_RESULTS = {
     "EC_COMPAREDERIVEDTOAGGREGATE": "Successfully compared derived value {value1} to aggregate value {value2}",
     "EC_CHECKBUTTONNOTCLICKABLE": "Successfully checked button {value1} is not clickable",
     "EC_COMPAREBIDOFFERPRICES": "Successfully compared bid and offer prices for {value1} and {value2}",
-    "EC_HANDLEPOPUPS": "Successfully handled popups with button {value1}",
+    "EC_HANDLEPOPUPS": "Successfully handled popup",
     "EC_SETINVALIDVALUESINDROPDOWN": "Invalid value(s) are not accepted in {value1} dropdown.",
     "EC_SETVOLTEXTBOX": "Successfully set {value2} in {value1} vol textbox.",
     "EC_RESETBIDOFFERVERIFICATION": "Bid/offer values are successfully reset for cells {value1}.",
