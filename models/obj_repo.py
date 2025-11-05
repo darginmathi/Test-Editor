@@ -2,6 +2,7 @@ import pandas as pd
 from .model import TableModel
 
 from PyQt6.QtCore import QModelIndex, Qt
+from typing import Optional
 
 class ObjRepoModel(TableModel):
 
@@ -22,7 +23,7 @@ class ObjRepoModel(TableModel):
         "chk": "Checkbox"
     }
 
-    def __init__(self, df: pd.DataFrame = None):
+    def __init__(self, df: Optional[pd.DataFrame] = None) -> None:
         super().__init__(df=df)
 
     @classmethod
@@ -48,7 +49,6 @@ class ObjRepoModel(TableModel):
                     super().setData(type_index, full_type, role)
                     break
         return result
-
 
     def insertRows(self, position, rows, parent=QModelIndex()):
         success = super().insertRows(position, rows, parent)

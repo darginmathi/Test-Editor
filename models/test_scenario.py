@@ -2,6 +2,7 @@ import pandas as pd
 from .model import TableModel
 
 from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal
+from typing import Optional
 
 class TestScenarioModel(TableModel):
 
@@ -18,7 +19,7 @@ class TestScenarioModel(TableModel):
     DATA4_COL = 10
     DATA5_COL = 11
 
-    def __init__(self, df: pd.DataFrame = None):
+    def __init__(self, df: Optional[pd.DataFrame] = None) -> None:
         super().__init__(df=df)
 
     @classmethod

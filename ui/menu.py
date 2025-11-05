@@ -1,18 +1,23 @@
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import QMenuBar
+from typing import TYPE_CHECKING
 
 from ui.tab import TabWidget
+if TYPE_CHECKING:
+    from ui.window import MainWindow
 
 class MenuBar(QMenuBar):
-    def __init__(self, main):
+    def __init__(self, main: "MainWindow") -> None:
         super().__init__(main)
         self.main = main
         self.file_ops = main.file_ops
         self.create_menu_bar()
 
-    def create_menu_bar(self):
+    def create_menu_bar(self) -> None:
 
         menubar = self.main.menuBar()
+        if menubar is None:
+            return
 
         self._create_file_menu(menubar)
         self._create_edit_menu(menubar)
@@ -30,8 +35,10 @@ class MenuBar(QMenuBar):
         menubar.addAction(fixed_width_action)
 
 
-    def _create_file_menu(self, menubar):
+    def _create_file_menu(self, menubar: QMenuBar) -> None:
         file_menu = menubar.addMenu("File")
+        if file_menu is None:
+            return
 
         new_action = QAction("New File", self.main)
         new_action.triggered.connect(self.file_ops.new_file)
@@ -57,8 +64,11 @@ class MenuBar(QMenuBar):
 
         file_menu.addSeparator()
 
-    def _create_edit_menu(self, menubar):
+    def _create_edit_menu(self, menubar: QMenuBar) -> None:
         edit_menu = menubar.addMenu("Edit")
+        if edit_menu is None:
+            return
+
         edit_menu.addAction(self.main.undo_action)
         edit_menu.addAction(self.main.redo_action)
 
@@ -73,7 +83,7 @@ class MenuBar(QMenuBar):
         find_action.triggered.connect(self.main._show_find_dialog)
         edit_menu.addAction(find_action)
 
-    def generate_test_cases_action(self):
+    def generate_test_cases_action(self) -> None:
         current_tab = self.main.get_current_tab()
         if current_tab and hasattr(current_tab, 'controller'):
             current_table = self.main.get_current_table()
@@ -86,12 +96,12 @@ class MenuBar(QMenuBar):
                     message = f"No empty fields found to generate."
                     self.main.show_status_message(message, "info", 5000)
 
-    def auto_adjust_cells(self):
+    def auto_adjust_cells(self) -> None:
         table = self.main.get_current_table()
         if table:
             table.auto_adjust_cells()
 
-    def apply_fixed_widths(self):
+    def apply_fixed_widths(self) -> None:
         tab = self.main.get_current_tab()
         if isinstance(tab, TabWidget) and tab.inner_tabs.currentIndex() == 0:
             scenario_table_view = tab.table1.table

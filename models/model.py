@@ -1,8 +1,9 @@
 import pandas as pd
 from PyQt6.QtCore import QAbstractTableModel, Qt, QModelIndex
+from typing import Optional, Any
 
 class TableModel(QAbstractTableModel):
-    def __init__(self, df: pd.DataFrame = None):
+    def __init__(self, df: Optional[pd.DataFrame] = None) -> None:
         super().__init__()
 
         if df is None:
@@ -42,7 +43,7 @@ class TableModel(QAbstractTableModel):
             return True
         return False
 
-    def headerData(self, section: int, orientation: Qt.Orientation, role: Qt.ItemDataRole):
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
                 return chr(65 + section) if section <  26 else f"Col{section+1}"

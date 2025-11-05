@@ -20,7 +20,7 @@ EXPECTED_RESULTS = {
     "EC_SELECTDROPDOWN": "Successfully selected {value2} in {value1} dropdown",
     "FWC_PAGEREFRESH": "Successfully refreshed the page",
     "FWC_SELECTTOGGLEBUTTON": "Successfully selected {value2} in {value1} toggle",
-    "FWC_OPENNEWTAB": "Successfully opened new tab with URL {value1} and name {value2}",
+    "FWC_OPENNEWTAB": "Successfully opened new tab with URL {value1}",
     "FWC_SWITCHTOTAB": "Successfully switched to tab {value1}",
     "FWC_VERIFYBUTTONEXIST": "Successfully verified {value1} button exists",
     "FWC_VERIFYTEXTBOXEXIST": "Successfully verified {value1} textbox exists",
