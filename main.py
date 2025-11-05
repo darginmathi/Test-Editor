@@ -2,7 +2,7 @@ import os
 import sys
 from ui.window import MainWindow
 from PyQt6.QtWidgets import QApplication
-from ui.styles import get_stylesheet
+from ui.styles import get_stylesheet, DarkTheme
 from PyQt6.QtGui import QIcon
 
 def main():
@@ -10,7 +10,7 @@ def main():
     app.setApplicationName("Test Case Editor")
     app.setApplicationVersion("0.3.0")
     app.setWindowIcon(QIcon("resources/testeditor_logo.PNG"))
-    style_sheet = get_stylesheet()
+    style_sheet = get_stylesheet(DarkTheme)
     app.setStyleSheet(style_sheet)
     editor = MainWindow()
     editor.show()

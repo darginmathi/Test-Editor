@@ -6,7 +6,7 @@ import re
 from .menu import MenuBar
 from .tab import TabWidget
 from .find_replace import FindReplace
-from .styles import THEMES
+from .styles import DarkTheme, LightTheme
 from models import TableModel
 from core import FileController
 from core.command_manager import CommandManager
@@ -476,7 +476,7 @@ class MainWindow(QMainWindow):
             event.accept()
 
     def get_current_colors(self):
-        return THEMES.get("dark", THEMES["dark"])
+        return DarkTheme()
 
 
 
