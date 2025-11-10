@@ -66,6 +66,8 @@ class TabWidget(QWidget):
         self.model1.dataChanged.connect(self.update_tab_text)
         self.model2.dataChanged.connect(self.update_tab_text)
         self.model2.dataChanged.connect(self.on_object_model_changed)
+        self.table1.skipRequested.connect(lambda r: self.controller.skip(self.model1, r))
+        self.table1.unskipRequested.connect(lambda r: self.controller.unskip(self.model1, r))
 
         self.undo_stack.cleanChanged.connect(self.update_tab_text)
 

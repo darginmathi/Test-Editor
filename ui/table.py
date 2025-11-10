@@ -9,6 +9,8 @@ class Table(QWidget):
     pasteRequested = pyqtSignal(QModelIndex)
     cutRequested = pyqtSignal(QItemSelection)
     clearRequested = pyqtSignal(QItemSelection)
+    skipRequested = pyqtSignal(list)
+    unskipRequested = pyqtSignal(list)
 
     def __init__(self, model, undo_stack=None, delegate=None):
         super().__init__()
@@ -65,10 +67,22 @@ class Table(QWidget):
         insert_row_action.setShortcut("Ctrl+I")
         menu.addAction(insert_row_action)
 
-        delete_row_action = QAction("Delete Rows", self)
-        delete_row_action.triggered.connect(self.delete_rows)
-        delete_row_action.setShortcut("Ctrl+D")
-        menu.addAction(delete_row_action)
+        remove_row_action = QAction("Delete Rows", self)
+        remove_row_action.triggered.connect(self.remove_rows)
+        remove_row_action.setShortcut("Ctrl+D")
+        menu.addAction(remove_row_action)
+
+        menu.addSeparator()
+
+        mark_skip_action = QAction("Mark Skip", self)
+        mark_skip_action.triggered.connect(self.skip)
+        mark_skip_action.setShortcut("Ctrl+T")
+        menu.addAction(mark_skip_action)
+
+        mark_unskip_action = QAction("Mark Unskip", self)
+        mark_unskip_action.triggered.connect(self.unskip)
+        mark_unskip_action.setShortcut("Ctrl+G")
+        menu.addAction(mark_unskip_action)
 
         menu.addSeparator()
 
@@ -100,8 +114,14 @@ class Table(QWidget):
         self.insert_shortcut = QShortcut(QKeySequence("Ctrl+I"), self)
         self.insert_shortcut.activated.connect(self.insert_rows)
 
-        self.delete_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
-        self.delete_shortcut.activated.connect(self.delete_rows)
+        self.remove_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
+        self.remove_shortcut.activated.connect(self.remove_rows)
+
+        self.skip_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.skip_shortcut.activated.connect(self.skip)
+
+        self.unskip_shortcut = QShortcut(QKeySequence("Ctrl+G"), self)
+        self.unskip_shortcut.activated.connect(self.unskip)
 
         self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self)
         self.copy_shortcut.activated.connect(self.copy_cells)
@@ -160,7 +180,7 @@ class Table(QWidget):
             else:
                 return
 
-    def delete_rows(self):
+    def remove_rows(self):
         selection = self.table.selectionModel().selection()
         if not selection.isEmpty():
             rows = sorted(list(set(index.row() for index in selection.indexes() if index.isValid())))
@@ -215,6 +235,20 @@ class Table(QWidget):
             span_size = end - start + 1
             if span_size > 1:
                 self.table.setSpan(start, desc_col, span_size, 1)
+
+    def skip(self):
+        selection = self.table.selectionModel().selection()
+        if not selection.isEmpty():
+            rows = sorted(list(set(index.row() for index in selection.indexes() if index.isValid())))
+            if rows:
+                self.skipRequested.emit(rows)
+
+    def unskip(self):
+        selection = self.table.selectionModel().selection()
+        if not selection.isEmpty():
+            rows = sorted(list(set(index.row() for index in selection.indexes() if index.isValid())))
+            if rows:
+                self.unskipRequested.emit(rows)
 
     def _on_data_changed_commands(self, topLeft, bottomRight, roles):
         command_col = 6

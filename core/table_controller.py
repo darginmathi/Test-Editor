@@ -176,3 +176,33 @@ class TableController(QObject):
                         self.undo_stack.push(command_obj)
         self.undo_stack.endMacro()
         return test_case_generated
+
+    def unskip(self, model, rows):
+        if not rows:
+            return
+        if not isinstance(model, TestScenarioModel):
+            return
+        self.undo_stack.beginMacro("Unskip")
+        for row_index in rows:
+            index = model.index(row_index, TestScenarioModel.SKIP_COL)
+            if index.isValid():
+                old_value = model.data(index, Qt.ItemDataRole.EditRole)
+                if str(old_value) != "":
+                    command = EditCellCommand(model, index, "", old_value)
+                    self.undo_stack.push(command)
+        self.undo_stack.endMacro()
+
+    def skip(self, model, rows):
+        if not rows:
+            return
+        if not isinstance(model, TestScenarioModel):
+            return
+        self.undo_stack.beginMacro("Skip")
+        for row_index in rows:
+            index = model.index(row_index, TestScenarioModel.SKIP_COL)
+            if index.isValid():
+                old_value = model.data(index, Qt.ItemDataRole.EditRole)
+                if str(old_value) != "X":
+                    command = EditCellCommand(model, index, "X", old_value)
+                    self.undo_stack.push(command)
+        self.undo_stack.endMacro()
