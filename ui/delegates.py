@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox,
                              QCompleter, QStyleOptionViewItem, QApplication, QStyle)
-from PyQt6.QtCore import Qt, QModelIndex, QTimer, QStringListModel
+from PyQt6.QtCore import Qt, QModelIndex, QTimer, QStringListModel, QMetaObject
 from PyQt6.QtGui import QColor, QPalette
 
 from core.undo_commands import EditCellCommand
@@ -147,6 +147,7 @@ class ComboBoxDelegate(QStyledItemDelegate):
             blocked = editor.blockSignals(True)
             editor.setCurrentText(value_str)
             editor.blockSignals(blocked)
+            editor.lineEdit().selectAll()
         elif isinstance(editor, QLineEdit):
             editor.setText(value_str)
         else:

@@ -93,7 +93,7 @@ class TableController(QObject):
                 "Overwrite existing cells",
                 "This operation will overwrite existing data. Do you want to proceed?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No
+                QMessageBox.StandardButton.Yes
             )
             if reply !=QMessageBox.StandardButton.Yes:
                 return

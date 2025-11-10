@@ -110,7 +110,7 @@ def get_stylesheet(theme) -> str:
         border: 1px solid {theme.BORDER};
         border-radius: 4px;
         selection-color: {theme.TEXT};
-        selection-background-color: {theme.INFO};
+        selection-background-color: {theme.BORDER_MUTED};
     }}
 
     QTableView::item:focus {{

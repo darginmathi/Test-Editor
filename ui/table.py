@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableView, QHeaderView, QMenu, QInputDialog
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableView, QHeaderView, QMenu, QInputDialog, QMessageBox
 from PyQt6.QtCore import Qt, pyqtSignal, QItemSelection, QModelIndex
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 
@@ -169,7 +169,19 @@ class Table(QWidget):
         else:
             return
         if rows:
-            self.deleteRowsRequested.emit(rows)
+            reply = QMessageBox.question(
+                self,
+                "Confirm Delete",
+                f"Are you sure you want to delete {len(rows)} row(s)",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self.deleteRowsRequested.emit(rows)
+            else:
+                return
+
+
 
     def merge_cells(self):
         self.table.clearSpans()
