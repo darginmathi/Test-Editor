@@ -76,12 +76,12 @@ class Table(QWidget):
 
         mark_skip_action = QAction("Mark Skip", self)
         mark_skip_action.triggered.connect(self.skip)
-        mark_skip_action.setShortcut("Ctrl+T")
+        mark_skip_action.setShortcut("Ctrl+R")
         menu.addAction(mark_skip_action)
 
         mark_unskip_action = QAction("Mark Unskip", self)
         mark_unskip_action.triggered.connect(self.unskip)
-        mark_unskip_action.setShortcut("Ctrl+G")
+        mark_unskip_action.setShortcut("Ctrl+T")
         menu.addAction(mark_unskip_action)
 
         menu.addSeparator()
@@ -117,10 +117,10 @@ class Table(QWidget):
         self.remove_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
         self.remove_shortcut.activated.connect(self.remove_rows)
 
-        self.skip_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.skip_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
         self.skip_shortcut.activated.connect(self.skip)
 
-        self.unskip_shortcut = QShortcut(QKeySequence("Ctrl+G"), self)
+        self.unskip_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
         self.unskip_shortcut.activated.connect(self.unskip)
 
         self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self)

@@ -1,5 +1,7 @@
 from PyQt6.QtGui import QAction, QKeySequence
-from PyQt6.QtWidgets import QMenuBar
+from PyQt6.QtWidgets import QMenuBar, QMessageBox
+from core.commands import COMMANDS
+from models.test_scenario import TestScenarioModel
 from typing import TYPE_CHECKING
 
 from ui.tab import TabWidget
@@ -36,7 +38,7 @@ class MenuBar(QMenuBar):
 
         generate_action = QAction("Generate Test Cases", self.main)
         generate_action.triggered.connect(self.generate_test_cases_action)
-        generate_action.setShortcut("")
+        generate_action.setShortcut("Ctrl+G")
         generate_action.setToolTip("Generate Test Cases")
         menubar.addAction(generate_action)
 
@@ -86,15 +88,54 @@ class MenuBar(QMenuBar):
 
     def generate_test_cases_action(self) -> None:
         current_tab = self.main.get_current_tab()
-        if current_tab and hasattr(current_tab, 'controller'):
-            current_table = self.main.get_current_table()
-            if current_table:
-                num_generated = current_tab.controller.generate_test_cases(current_table.model)
+        if not current_tab and hasattr(current_tab, 'controller'):
+            return
+        current_table = self.main.get_current_table()
+        if not current_table:
+            return
+
+        model = current_table.model
+
+        for row in range(model.rowCount()):
+            command = model.data(model.index(row, TestScenarioModel.COMMAND_COL), 0)
+            if command in COMMANDS:
+                steps_data = model.data(model.index(row, TestScenarioModel.STEPS_COL), 0)
+                expected_data = model.data(model.index(row, TestScenarioModel.EXPECTED_COL), 0)
+                if steps_data or expected_data:
+                    overwrite_needed = True
+                    break
+
+        should_proceed = True
+        should_overwrite = False
+        if overwrite_needed:
+            msg_box = QMessageBox(self.main)
+            msg_box.setWindowTitle("Generate Test Cases")
+            msg_box.setText("Some test cases already have data.")
+            msg_box.setInformativeText("How would you like to proceed?")
+
+            reset_button = msg_box.addButton("Reset All", QMessageBox.ButtonRole.DestructiveRole)
+            fill_empty_button = msg_box.addButton("Fill Empty", QMessageBox.ButtonRole.AcceptRole)
+            cancel_button = msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+
+            msg_box.setDefaultButton(fill_empty_button)
+            msg_box.exec()
+
+            clicked_button = msg_box.clickedButton()
+            if clicked_button == reset_button:
+                should_overwrite = True
+            elif clicked_button == fill_empty_button:
+                should_overwrite = False
+            else:
+                should_proceed = False
+                self.main.show_status_message("Operation cancelled.", "info", 3000)
+
+            if should_proceed:
+                num_generated = current_tab.controller.generate_test_cases(model, overwrite=should_overwrite)
                 if num_generated > 0:
-                    message = f"Generated {num_generated} test case(s)."
+                    message = f"Successfully generated {num_generated} test case(s)."
                     self.main.show_status_message(message, "success", 5000)
                 else:
-                    message = f"No empty fields found to generate."
+                    message = "No test cases were generated."
                     self.main.show_status_message(message, "info", 5000)
 
     def auto_adjust_cells(self) -> None:

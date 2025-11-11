@@ -133,7 +133,7 @@ class TableController(QObject):
                     self.undo_stack.push(command)
         self.undo_stack.endMacro()
 
-    def generate_test_cases(self, model):
+    def generate_test_cases(self, model, overwrite=False):
         test_case_generated = 0
         self.undo_stack.beginMacro("Generate Test Cases")
         for row in range(model.rowCount()):
@@ -143,7 +143,7 @@ class TableController(QObject):
             steps_performed_data = model.data(steps_performed_index, Qt.ItemDataRole.DisplayRole)
             expected_result_data = model.data(expected_result_index, Qt.ItemDataRole.DisplayRole)
 
-            if not steps_performed_data and not expected_result_data:
+            if overwrite or(not steps_performed_data and not expected_result_data):
                 command_index = model.index(row, TestScenarioModel.COMMAND_COL)
                 command = model.data(command_index, Qt.ItemDataRole.DisplayRole)
 
