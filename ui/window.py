@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView)
 from PyQt6.QtCore import Qt, QTimer, QModelIndex
-from PyQt6.QtGui import QAction, QKeySequence
+from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 
 import re
 from .menu import MenuBar
@@ -41,9 +41,32 @@ class MainWindow(QMainWindow):
         self.center_status_label.setObjectName("StatusLabel")
         self.center_status_label.hide()
         self._setup_find_and_replace()
+        self.create_shortcuts()
 
         self.setCentralWidget(self.main_tab)
         self.show_welcome_screen()
+
+    def create_shortcuts(self):
+        for i in range(1, 10):
+            shortcut = QShortcut(QKeySequence(f"Ctrl+{i}"), self)
+            shortcut.activated.connect(lambda idx=i-1: self.switch_main_tab(idx))
+
+        self.shortcut_ctrl_tab = QShortcut(QKeySequence("Ctrl+Tab"), self)
+        self.shortcut_ctrl_tab.activated.connect(self.toggle_table)
+
+        self.shortcut_ctrl_w = QShortcut(QKeySequence("Ctrl+W"), self)
+        self.shortcut_ctrl_w.activated.connect(lambda: self.close_tab(self.main_tab.currentIndex()))
+
+    def switch_main_tab(self, index):
+        if index < self.main_tab.count():
+            self.main_tab.setCurrentIndex(index)
+
+    def toggle_table(self):
+        current_tab = self.get_current_tab()
+        if current_tab and hasattr(current_tab, 'inner_tabs'):
+            current_index = current_tab.inner_tabs.currentIndex()
+            new_index = 1 - current_index
+            current_tab.inner_tabs.setCurrentIndex(new_index)
 
     def create_new_tab(self, module_name=None, scenario_path=None, obj_path=None, project_name=None):
         self.hide_welcome_screen()

@@ -34,6 +34,12 @@ class MenuBar(QMenuBar):
         fixed_width_action.setToolTip("Apply default fixed widths")
         menubar.addAction(fixed_width_action)
 
+        generate_action = QAction("Generate Test Cases", self.main)
+        generate_action.triggered.connect(self.generate_test_cases_action)
+        generate_action.setShortcut("")
+        generate_action.setToolTip("Generate Test Cases")
+        menubar.addAction(generate_action)
+
 
     def _create_file_menu(self, menubar: QMenuBar) -> None:
         file_menu = menubar.addMenu("File")
@@ -47,7 +53,7 @@ class MenuBar(QMenuBar):
 
         load_action = QAction("Open File", self.main)
         load_action.triggered.connect(self.file_ops.open_file)
-        load_action.setShortcut("Ctrl+O")
+        load_action.setShortcut("Ctrl+E")
         file_menu.addAction(load_action)
 
         file_menu.addSeparator()
@@ -71,11 +77,6 @@ class MenuBar(QMenuBar):
 
         edit_menu.addAction(self.main.undo_action)
         edit_menu.addAction(self.main.redo_action)
-
-        edit_menu.addSeparator()
-        generate_action = QAction("Generate Test Cases", self.main)
-        generate_action.triggered.connect(self.generate_test_cases_action)
-        edit_menu.addAction(generate_action)
 
         edit_menu.addSeparator()
         find_action = QAction("Find/Replace", self.main)
