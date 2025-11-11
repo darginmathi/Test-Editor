@@ -69,7 +69,6 @@ class MainWindow(QMainWindow):
         self.main_tab.setCurrentIndex(index)
         tab.update_tab_text()
         self.setWindowTitle("Test Case Editor")
-        self.on_tab_changed(index)
         return tab
 
     def find_existing_tab(self, project_name, module_name):
