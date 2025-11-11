@@ -26,7 +26,8 @@ A user-friendly desktop application to edit test cases for keyword-driven testin
 
 ## Known Issues
 
-* **Excel Coppatability:** Some files take longer than expected to load(suspect formating further testing required).
+* **Larger Files:** Dont use files larger than 1MB.
+    Note: If your file contain's unwanted empty spaces remove them all empty spaces will be read as empty string
 
 ## Installation
 

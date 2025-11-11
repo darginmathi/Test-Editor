@@ -31,7 +31,7 @@ class ObjRepoModel(TableModel):
         columns = [str(i) for i in range(4)]
         data = [
             ["Type", "User friendly name of Object", "By-Type", "Webdriver friendly name of Object"],
-            ["Link", "lnkAdmin", "XPATH", "//*[@id=\"page-admin\"]"],
+            ["", "", "XPATH", ""],
             ["END", "", "", ""]
         ]
         return pd.DataFrame(data, columns=columns)

@@ -172,7 +172,7 @@ class Table(QWidget):
                 "No. of Rows:",
                 1,
                 1,
-                100
+                1000
             )
             if ok and num > 0:
                 rows_to_insert = num

@@ -111,7 +111,19 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
     def _on_timer_timeout(self):
         if self.editor and self.current_index.isValid():
+            cursor_pos = None
+            if isinstance(self.editor, QLineEdit):
+                cursor_pos = self.editor.cursorPosition()
+            elif isinstance(self.editor, QComboBox):
+                cursor_pos = self.editor.lineEdit().cursorPosition()
+
             self.commitData.emit(self.editor)
+
+            if self.editor and cursor_pos is not None:
+                if isinstance(self.editor, QLineEdit):
+                    self.editor.setCursorPosition(cursor_pos)
+                elif isinstance(self.editor, QComboBox):
+                    self.editor.lineEdit().setCursorPosition(cursor_pos)
 
     def on_model_data_changed(self, topLeft, bottomRight, roles):
         if self.editor and self.current_index.isValid():
