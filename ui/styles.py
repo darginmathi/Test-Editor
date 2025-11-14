@@ -160,6 +160,71 @@ def get_stylesheet(theme) -> str:
         color: {theme.TEXT_MUTED};
     }}
 
+   /* Toolbar Run Control Buttons - Icon Colors Only */
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#RunButton {{
+        background-color: transparent;
+        border: none;
+        font-size: 24px;
+        width: 24px;
+        height: 12px;
+        color: {theme.SUCCESS};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#RunButton:hover {{
+        background-color: {theme.BG_LIGHT};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#RunButton:pressed {{
+        background-color: {theme.BG};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#RunButton:disabled {{
+        background-color: transparent;
+        color: {theme.TEXT_MUTED};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#StopButton {{
+        background-color: transparent;
+        border: none;
+        width: 24px;
+        height: 12px;
+        color: {theme.DANGER};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#StopButton:hover {{
+        background-color: {theme.BG_LIGHT};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#StopButton:pressed {{
+        background-color: {theme.BG};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#StopButton:disabled {{
+        background-color: transparent;
+        color: {theme.TEXT_MUTED};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#ConfigButton {{
+        background-color: transparent;
+        border: none;
+        width: 24px;
+        height: 12px;
+        color: {theme.INFO};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#ConfigButton:hover {{
+        background-color: {theme.BG_LIGHT};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#ConfigButton:pressed {{
+        background-color: {theme.BG};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton#ConfigButton:disabled {{
+        background-color: transparent;
+        color: {theme.TEXT_MUTED};
+    }}
+
     QPushButton#StatusBarButton {{
         border: none;
         padding: 2px 4px;
@@ -375,5 +440,29 @@ def get_stylesheet(theme) -> str:
         width: 0px;
         image: none;
         background-color: transparent;
+    }}
+    /* Corner Toolbar (specific to run controls) */
+    QToolBar[accessibleName="corner-toolbar"] {{
+        border: none;
+        background: transparent;
+        spacing: 1px;
+        padding: 0px;
+        margin: 0px;
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton {{
+        border: none;
+        background: transparent;
+        padding: 4px 4px;
+        margin: 0px;
+        border-radius: 2px;
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton:hover {{
+        background: {theme.HIGHLIGHT};
+    }}
+
+    QToolBar[accessibleName="corner-toolbar"] QToolButton:disabled {{
+        opacity: 0.3;
     }}
 """

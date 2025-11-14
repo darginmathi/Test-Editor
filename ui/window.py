@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView)
-from PyQt6.QtCore import Qt, QTimer, QModelIndex
+from PyQt6.QtCore import Qt, QTimer, QModelIndex, QSettings
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
+
 
 import re
 from .menu import MenuBar
@@ -11,6 +12,12 @@ from models import TableModel
 from core import FileController
 from core.command_manager import CommandManager
 from core.undo_commands import EditCellCommand
+from models.run_config import RunConfig, get_base_url
+from .output_dock import ConsoleDock
+from core.test_runner import TestRunner
+from .run_config import RunConfigDialog
+from PyQt6.QtWidgets import QDialog
+
 
 
 class MainWindow(QMainWindow):
@@ -42,6 +49,12 @@ class MainWindow(QMainWindow):
         self.center_status_label.hide()
         self._setup_find_and_replace()
         self.create_shortcuts()
+        self.test_runner = None
+        self.output_dock = None
+        self.run_settings = RunConfig()
+        self.run_settings.load_from_settings()
+
+        self.setup_run_toolbar()
 
         self.setCentralWidget(self.main_tab)
         self.show_welcome_screen()
@@ -474,6 +487,23 @@ class MainWindow(QMainWindow):
         self.show_status_message(f"Replaced {len(matches)} occurrences.", "success", 3000)
 
     def closeEvent(self, event):
+        if self.test_runner and self.test_runner.is_test_running():
+            msg_box = QMessageBox(self)
+            msg_box.setIcon(QMessageBox.Icon.Warning)
+            msg_box.setText("E2E Test running.......")
+            msg_box.setInformativeText("Do you want to stop the run and exit?")
+            discard_button = msg_box.addButton("Stop and Exit", QMessageBox.ButtonRole.DestructiveRole)
+            cancel_button = msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+            msg_box.setDefaultButton(cancel_button)
+            msg_box.exec()
+            if msg_box.clickedButton() == discard_button:
+                self.test_runner.stop_test()
+                self.test_runner.cleanup()
+                event.accept()
+            else:
+                event.ignore()
+                return
+
         unsaved_tabs = []
         for i in range(self.main_tab.count()):
             widget = self.main_tab.widget(i)
@@ -491,6 +521,8 @@ class MainWindow(QMainWindow):
             msg_box.exec()
 
             if msg_box.clickedButton() == discard_button:
+                self.test_runner.stop_test()
+                self.test_runner.cleanup()
                 event.accept()
             else:
                 event.ignore()
@@ -499,6 +531,136 @@ class MainWindow(QMainWindow):
 
     def get_current_colors(self):
         return DarkTheme()
+
+    def setup_run_toolbar(self):
+        self.output_dock = ConsoleDock(self)
+        self.output_dock.clear_requested.connect(self.clear_output)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
+        self.output_dock.hide()
+
+    def run_current_module(self):
+        tab = self.get_current_tab()
+
+        if not tab or not hasattr(tab, 'project_name'):
+            self.show_status_message("No test file open", "warning", 3000)
+            return
+
+        if not tab.project_name or not tab.module_name:
+            self.show_status_message("Current file is not a valid test module", "warning", 3000)
+            return
+
+        if self.output_dock.isHidden():
+            self.output_dock.show()
+
+        if not self.test_runner:
+            settings = QSettings("TestEditor", "Settings")
+            e2e_dir = settings.value("e2e_dir", "")
+            if not e2e_dir:
+                QMessageBox.warning(self, "E2E directory not set", "Set dir in open file menu")
+                return
+            self.test_runner = TestRunner(e2e_dir)
+            self.test_runner.output_received.connect(self.on_test_output)
+            self.test_runner.error_received.connect(self.on_test_error)
+            self.test_runner.process_finished.connect(self.on_test_finished)
+            self.test_runner.process_started.connect(self.on_test_started)
+
+        config = RunConfig(
+            project_name=tab.project_name,
+            module_name=tab.module_name,
+            base_url=get_base_url(tab.project_name),
+            browser=self.run_settings.browser,
+            video_option=self.run_settings.video_option,
+            wait_time=self.run_settings.wait_time
+        )
+
+        self.test_runner.run_test(config)
+
+    def stop_test(self):
+        if self.test_runner and self.test_runner.is_test_running():
+            self.test_runner.stop_test()
+        else:
+            QMessageBox.information(self, "No Test Running", "No test is currently running")
+
+    def show_run_config(self):
+        tab = self.get_current_tab()
+
+        if not tab or not hasattr(tab, 'project_name'):
+            self.show_status_message("No test file open", "warning", 3000)
+            return
+
+        if not tab.project_name or not tab.module_name:
+            self.show_status_message("Current file is not a valid test module", "warning", 3000)
+            return
+
+        current_config = RunConfig(
+            project_name=tab.project_name,
+            module_name=tab.module_name,
+            base_url=get_base_url(tab.project_name),
+            browser=self.run_settings.browser,
+            video_option=self.run_settings.video_option,
+            wait_time=self.run_settings.wait_time
+        )
+
+        dialog = RunConfigDialog(current_config, self)
+        self._position_dialog_near_run_button(dialog)
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            updated_config = dialog.get_config()
+            self.run_settings.browser = updated_config.browser
+            self.run_settings.video_option = updated_config.video_option
+            self.run_settings.wait_time = updated_config.wait_time
+            self.run_settings.save_to_settings()
+            self.show_status_message("Run configuration saved", "info", 3000)
+
+    def _position_dialog_near_run_button(self, dialog):
+        if hasattr(self.menu_bar, 'config_button'):
+            config_button = self.menu_bar.config_button
+            button_global_pos = config_button.mapToGlobal(config_button.rect().bottomLeft())
+
+            dialog_size = dialog.sizeHint()
+            screen_geometry = self.screen().availableGeometry()
+
+            x = screen_geometry.right() - dialog_size.width()
+            y = button_global_pos.y() + 5
+
+            if y + dialog_size.height() > screen_geometry.bottom():
+                y = screen_geometry.bottom() - dialog_size.height()
+
+            dialog.move(x, y)
+        else:
+            screen_geometry = self.screen().availableGeometry()
+            dialog_size = dialog.sizeHint()
+            x = screen_geometry.right() - dialog_size.width()
+            y = screen_geometry.top() + 50
+            dialog.move(x, y)
+
+    def on_test_started(self):
+        self.output_dock.set_status("Running...")
+
+        if hasattr(self.menu_bar, 'run_button'):
+            self.menu_bar.run_button.setEnabled(False)
+            self.menu_bar.stop_button.setEnabled(True)
+
+    def on_test_output(self, message):
+        self.output_dock.append_output(message)
+
+    def on_test_error(self, message):
+        self.output_dock.append_output(f"<span style='color: red;'>{message}</span>")
+
+    def on_test_finished(self, exit_code):
+        self.output_dock.set_status("Completed" if exit_code == 0 else "Failed", exit_code != 0)
+
+        if hasattr(self.menu_bar, 'run_button'):
+            self.menu_bar.run_button.setEnabled(True)
+            self.menu_bar.stop_button.setEnabled(False)
+
+        self.show_status_message(f"Test completed {'successfully' if exit_code == 0 else 'with errors'}",
+                               "success" if exit_code == 0 else "error",
+                               5000)
+
+    def clear_output(self):
+        if self.output_dock:
+            self.output_dock.clear_output()
 
 
 

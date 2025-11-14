@@ -1,5 +1,6 @@
 import os
 import re
+from pathlib import Path
 from PyQt6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout, QListWidget, QLabel,
     QPushButton, QListWidgetItem, QFileDialog, QMessageBox,
@@ -12,6 +13,7 @@ class FileUI(QDialog):
         super().__init__(main)
         self.mode = mode
         self.main = main
+        self.e2e_dir = None
         self.data_directory = None
         self.selected_project = None
         self.selected_scenario_path = None
@@ -36,13 +38,13 @@ class FileUI(QDialog):
 
     def _create_directory_layout(self):
         dir_layout = QHBoxLayout()
-        dir_layout.addWidget(QLabel("Data Directory: "))
+        dir_layout.addWidget(QLabel("E2E Directory: "))
 
         self.dir_label = QLabel("Not Selected")
         dir_layout.addWidget(self.dir_label)
 
         self.select_dir = QPushButton("Select Dir")
-        self.select_dir.clicked.connect(self._select_data_directory)
+        self.select_dir.clicked.connect(self._select_e2e_directory)
         dir_layout.addWidget(self.select_dir)
 
         return dir_layout
@@ -108,27 +110,49 @@ class FileUI(QDialog):
 
     def _load_last_directory(self):
         settings = QSettings("TestEditor", "Settings")
-        last_dir = settings.value("last_directory", "")
+        e2e_dir = settings.value("e2e_dir", "")
 
-        if last_dir and os.path.exists(last_dir):
-            self.data_directory = last_dir
-            self.dir_label.setText(last_dir)
+        if e2e_dir and os.path.exists(e2e_dir):
+            self.e2e_dir = e2e_dir
+            self.data_directory = os.path.join(e2e_dir, "data")
+            self.dir_label.setText(e2e_dir)
             self._populate_projects()
             self._load_last_project()
 
     def _save_last_directory(self):
         if self.data_directory:
             settings = QSettings("TestEditor", "Settings")
-            settings.setValue("last_directory", self.data_directory)
+            settings.setValue("e2e_dir", self.e2e_dir)
 
-    def _select_data_directory(self):
+    def _select_e2e_directory(self):
         directory = QFileDialog.getExistingDirectory(self, "Select Directory")
         if directory:
-            self.data_directory = directory
-            self.dir_label.setText(directory)
-            self._save_last_directory()
-            self._populate_projects()
-            self._load_last_project()
+            e2e_dir = directory
+            data_dir = os.path.join(directory, "data")
+
+            if self._validate_directory(e2e_dir, data_dir):
+                self.e2e_dir = directory
+                self.data_directory = data_dir
+
+                self.dir_label.setText(self.data_directory)
+                self._save_last_directory()
+                self._populate_projects()
+                self._load_last_project()
+            else:
+                QMessageBox.warning(self, "Invalid Directory",
+                "Selected directory should be the E2E application root with 'data/' subdirectory")
+
+    def _validate_directory(self, e2e_dir, data_dir):
+        app_path = Path(e2e_dir)
+        data_path = Path(data_dir)
+
+        has_pom = (app_path / "pom.xml").exists()
+        has_src = (app_path / "src").exists()
+
+        has_test_suites = (data_path / "testSuites").exists()
+        has_obj_repos = (data_path / "objectRepositories").exists()
+
+        return has_pom and has_src and has_test_suites and has_obj_repos
 
     def _load_last_project(self):
         if self.mode != "open":
