@@ -441,10 +441,14 @@ def get_stylesheet(theme) -> str:
         image: none;
         background-color: transparent;
     }}
+
     /* Corner Toolbar (specific to run controls) */
     QToolBar[accessibleName="corner-toolbar"] {{
-        border: none;
         background: transparent;
+        border-left: 1px solid {theme.BORDER};
+        border-right: 1px solid {theme.BORDER};
+        border-bottom: 1px solid {theme.BORDER};
+        border-radius: 6px;
         spacing: 1px;
         padding: 0px;
         margin: 0px;

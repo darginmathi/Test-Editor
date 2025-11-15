@@ -536,7 +536,16 @@ class MainWindow(QMainWindow):
         self.output_dock = ConsoleDock(self)
         self.output_dock.clear_requested.connect(self.clear_output)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
+        self.console_shortcut = QShortcut(QKeySequence("Ctrl+`"), self)
+        self.console_shortcut.activated.connect(self.toggle_console)
         self.output_dock.hide()
+
+    def toggle_console(self):
+        if self.output_dock.isVisible():
+            self.output_dock.hide()
+        else:
+            self.output_dock.show()
+            self.output_dock.raise_()
 
     def run_current_module(self):
         tab = self.get_current_tab()
@@ -548,6 +557,9 @@ class MainWindow(QMainWindow):
         if not tab.project_name or not tab.module_name:
             self.show_status_message("Current file is not a valid test module", "warning", 3000)
             return
+
+        if self.output_dock:
+            self.output_dock.clear_output()
 
         if self.output_dock.isHidden():
             self.output_dock.show()
@@ -564,10 +576,12 @@ class MainWindow(QMainWindow):
             self.test_runner.process_finished.connect(self.on_test_finished)
             self.test_runner.process_started.connect(self.on_test_started)
 
+        url = getattr(self, 'current_run_url', None) or get_base_url(tab.project_name)
+
         config = RunConfig(
             project_name=tab.project_name,
             module_name=tab.module_name,
-            base_url=get_base_url(tab.project_name),
+            base_url=url,
             browser=self.run_settings.browser,
             video_option=self.run_settings.video_option,
             wait_time=self.run_settings.wait_time
@@ -592,10 +606,12 @@ class MainWindow(QMainWindow):
             self.show_status_message("Current file is not a valid test module", "warning", 3000)
             return
 
+        url = getattr(self, 'current_run_url', None) or get_base_url(tab.project_name)
+
         current_config = RunConfig(
             project_name=tab.project_name,
             module_name=tab.module_name,
-            base_url=get_base_url(tab.project_name),
+            base_url=url,
             browser=self.run_settings.browser,
             video_option=self.run_settings.video_option,
             wait_time=self.run_settings.wait_time
@@ -610,6 +626,7 @@ class MainWindow(QMainWindow):
             self.run_settings.video_option = updated_config.video_option
             self.run_settings.wait_time = updated_config.wait_time
             self.run_settings.save_to_settings()
+            self.current_url = updated_config.base_url
             self.show_status_message("Run configuration saved", "info", 3000)
 
     def _position_dialog_near_run_button(self, dialog):
@@ -636,27 +653,30 @@ class MainWindow(QMainWindow):
 
     def on_test_started(self):
         self.output_dock.set_status("Running...")
+        tab = self.get_current_tab()
+        if tab:
+            self.output_dock.log_test_start(tab.project_name, tab.module_name)
 
         if hasattr(self.menu_bar, 'run_button'):
             self.menu_bar.run_button.setEnabled(False)
             self.menu_bar.stop_button.setEnabled(True)
 
     def on_test_output(self, message):
-        self.output_dock.append_output(message)
+        self.output_dock.log_maven_output(message)
 
     def on_test_error(self, message):
-        self.output_dock.append_output(f"<span style='color: red;'>{message}</span>")
+        self.output_dock.log(message)
 
     def on_test_finished(self, exit_code):
+        self.output_dock.log_test_result(exit_code)
         self.output_dock.set_status("Completed" if exit_code == 0 else "Failed", exit_code != 0)
 
         if hasattr(self.menu_bar, 'run_button'):
             self.menu_bar.run_button.setEnabled(True)
             self.menu_bar.stop_button.setEnabled(False)
 
-        self.show_status_message(f"Test completed {'successfully' if exit_code == 0 else 'with errors'}",
-                               "success" if exit_code == 0 else "error",
-                               5000)
+        status = "success" if exit_code == 0 else "error"
+        self.show_status_message(f"Run {'completed' if exit_code == 0 else 'failed to execute'}", status, 5000)
 
     def clear_output(self):
         if self.output_dock:

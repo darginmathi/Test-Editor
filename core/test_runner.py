@@ -22,17 +22,17 @@ class TestRunner(QObject):
 
     def run_test(self, config: RunConfig):
         if self.is_running:
-            self.output_received.emit("Test already running! Stop it first.")
+            self.output_received.emit("✗ Test already running! Stop it first.")
             return
 
         # Verify directory and pom.xml
         if not os.path.exists(self.e2e_dir):
-            self.error_received.emit(f"E2E directory does not exist: {self.e2e_dir}")
+            self.error_received.emit(f"✗ E2E directory does not exist: {self.e2e_dir}")
             return
 
         pom_file = os.path.join(self.e2e_dir, "pom.xml")
         if not os.path.exists(pom_file):
-            self.error_received.emit(f"pom.xml not found in E2E directory: {self.e2e_dir}")
+            self.error_received.emit(f"✗ Current Directory is not a maven project: {self.e2e_dir}")
             return
 
         args = self._build_command_args(config)
@@ -56,7 +56,7 @@ class TestRunner(QObject):
 
         self.is_running = True
         self.process_started.emit()
-        self.output_received.emit(f"Starting test: {config.project_name}/{config.module_name}")
+        self.output_received.emit(f"[INFO] Starting test: {config.project_name}/{config.module_name}")
 
         # Use mvn.cmd explicitly
         self.process.start("mvn.cmd", args)
@@ -76,7 +76,7 @@ class TestRunner(QObject):
         if not self.is_running or not self.process:
             return
 
-        self.output_received.emit("Stopping test execution...")
+        self.output_received.emit("[INFO] Stopping test execution...")
         self.process.terminate()
 
         self._force_kill_timer.start(3000)
@@ -84,9 +84,9 @@ class TestRunner(QObject):
     def _force_kill_process(self):
         if self.is_running and self.process and self.process.state() == QProcess.ProcessState.Running:
             self.process.kill()
-            self.output_received.emit("Force killed process")
+            self.output_received.emit("[INFO] Force killed process")
             self.is_running = False
-            self.output_received.emit("Test stopped")
+            self.output_received.emit("[INFO] Test stopped")
 
     def _on_stdout(self):
         if self.process:
@@ -96,15 +96,11 @@ class TestRunner(QObject):
     def _on_stderr(self):
         if self.process:
             data = self.process.readAllStandardError().data().decode()
-            self.error_received.emit(f"❌ {data}")
+            self.error_received.emit(data)
 
     def _on_finished(self, exit_code):
         self.is_running = False
         self._force_kill_timer.stop()
-        if exit_code == 0:
-            self.output_received.emit("✅ Test completed successfully")
-        else:
-            self.output_received.emit(f"❌ Test failed with exit code: {exit_code}")
         self.process_finished.emit(exit_code)
 
     def is_test_running(self):

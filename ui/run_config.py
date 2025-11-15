@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
                              QComboBox, QSpinBox, QDialogButtonBox,
-                             QGroupBox, QFormLayout)
+                             QGroupBox, QFormLayout, QLineEdit, QPushButton)
+from PyQt6.QtCore import Qt
 from models.run_config import RunConfig
 
 class RunConfigDialog(QDialog):
@@ -17,16 +18,18 @@ class RunConfigDialog(QDialog):
 
         layout = QVBoxLayout(self)
 
-        info_group = QGroupBox("Test Information")
+        info_group = QGroupBox("Run Info")
         info_layout = QFormLayout(info_group)
 
         self.project_label = QLabel(self.current_config.project_name)
         self.module_label = QLabel(self.current_config.module_name)
-        self.url_label = QLabel(self.current_config.base_url)
+        self.url_input = QLabel(self.current_config.base_url)
+        # self.url_input = QLineEdit()
+        # self.url_input.setPlaceholderText("Enter URL...")
 
-        info_layout.addRow("Project:", self.project_label)
-        info_layout.addRow("Module:", self.module_label)
-        info_layout.addRow("URL:", self.url_label)
+        info_layout.addRow("Project", self.project_label)
+        info_layout.addRow("Module ", self.module_label)
+        info_layout.addRow("URL    ", self.url_input)
 
         layout.addWidget(info_group)
 
@@ -43,9 +46,9 @@ class RunConfigDialog(QDialog):
         self.wait_time_spin.setRange(10, 120)
         self.wait_time_spin.setSuffix(" seconds")
 
-        settings_layout.addRow("Browser:", self.browser_combo)
-        settings_layout.addRow("Video Recording:", self.video_combo)
-        settings_layout.addRow("Wait Time:", self.wait_time_spin)
+        settings_layout.addRow("Browser        ", self.browser_combo)
+        settings_layout.addRow("Video Recording", self.video_combo)
+        settings_layout.addRow("Wait Time      ", self.wait_time_spin)
 
         layout.addWidget(settings_group)
 
@@ -59,6 +62,8 @@ class RunConfigDialog(QDialog):
         layout.addWidget(button_box)
 
     def load_current_config(self):
+        self.url_input.setText(self.current_config.base_url)
+        # self.url_input.setCursorPosition(0)
         self.browser_combo.setCurrentText(self.current_config.browser)
         self.video_combo.setCurrentText(self.current_config.video_option)
         self.wait_time_spin.setValue(self.current_config.wait_time)
@@ -67,7 +72,7 @@ class RunConfigDialog(QDialog):
         return RunConfig(
             project_name=self.current_config.project_name,
             module_name=self.current_config.module_name,
-            base_url=self.current_config.base_url,
+            base_url=self.url_input.text().strip(),
             browser=self.browser_combo.currentText(),
             video_option=self.video_combo.currentText(),
             wait_time=self.wait_time_spin.value()
