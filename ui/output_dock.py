@@ -1,9 +1,11 @@
-from PyQt6.QtWidgets import (QDockWidget, QTabWidget,  QTextEdit, QTabBar, QToolBar, QVBoxLayout, QWidget,
+from PyQt6.QtWidgets import (QDockWidget, QTabWidget,  QTextEdit, QTabBar, QVBoxLayout, QWidget,
                              QHBoxLayout, QPushButton, QLabel)
-from PyQt6.QtCore import Qt, pyqtSignal, QUrl, QFileSystemWatcher
-from PyQt6.QtGui import QTextCursor
+from PyQt6.QtCore import Qt, pyqtSignal, QUrl, QFileSystemWatcher, QTimer
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineHistory
+from PyQt6.QtWidgets import QStyle
+from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineScript
+
 
 class OutputDock(QDockWidget):
     clear_requested = pyqtSignal()
@@ -15,19 +17,29 @@ class OutputDock(QDockWidget):
         title_bar = QWidget()
         title_bar_layout = QHBoxLayout(title_bar)
         title_bar_layout.setContentsMargins(5, 0, 5, 0)
-        title_bar_layout.setSpacing(5)
+        title_bar_layout.setSpacing(1)
 
-        title_label = QLabel("Output:")
-        title_bar_layout.addWidget(title_label)
         title_bar_layout.addStretch()
 
         self.is_maximized = False
         self.restore_height = 0
 
-        self.back_button = QPushButton("Back")
-        self.forward_button = QPushButton("Forward")
-        self.open_log_button = QPushButton("Open Log")
-        self.maximize_button = QPushButton("Maximize")
+        style = self.style()
+        # back_icon = style.standardIcon(QStyle.StandardPixmap.SP_ArrowBack)
+        # forward_icon = style.standardIcon(QStyle.StandardPixmap.SP_ArrowForward)
+        open_log_icon = style.standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
+        self.maximize_icon = style.standardIcon(QStyle.StandardPixmap.SP_TitleBarMaxButton)
+        self.restore_icon = style.standardIcon(QStyle.StandardPixmap.SP_TitleBarNormalButton)
+
+        self.back_button = QPushButton("◀")
+        self.forward_button = QPushButton("▶")
+        self.maximize_button = QPushButton(icon=self.maximize_icon)
+        self.open_log_button = QPushButton(icon=open_log_icon)
+
+        self.back_button.setObjectName("DockTitleBarButton")
+        self.forward_button.setObjectName("DockTitleBarButton")
+        self.maximize_button.setObjectName("DockTitleBarButton")
+        self.open_log_button.setObjectName("DockTitleBarButton")
 
         self.back_button.hide()
         self.forward_button.hide()
@@ -36,6 +48,16 @@ class OutputDock(QDockWidget):
         title_bar_layout.addWidget(self.forward_button)
         title_bar_layout.addWidget(self.open_log_button)
         title_bar_layout.addWidget(self.maximize_button)
+
+        self.back_button.setFlat(True)
+        self.forward_button.setFlat(True)
+        self.open_log_button.setFlat(True)
+        self.maximize_button.setFlat(True)
+
+        self.back_button.setToolTip("Go Back (Alt+Left)")
+        self.forward_button.setToolTip("Go Forward (Alt+Right)")
+        self.open_log_button.setToolTip("Open Log File")
+        self.maximize_button.setToolTip("Maximize/Restore Dock (Ctrl+M)")
 
         self.setTitleBarWidget(title_bar)
         self.maximize_button.clicked.connect(self.toggle_maximize)
@@ -58,18 +80,21 @@ class OutputDock(QDockWidget):
         self.tabs.tabBar().setTabButton(0, QTabBar.ButtonPosition.RightSide, None)
         self.tabs.currentChanged.connect(self.on_tab_changed)
 
+        self.log_polling_timer = QTimer(self)
+        self.log_polling_timer.timeout.connect(self._poll_active_log)
+
+        self._warmup_web_engine()
+
     def get_console(self):
         return self.console
 
     def open_log_tab(self, filepath, title):
         report_view = QWebEngineView()
+        report_view.loadFinished.connect(self._scroll_log)
         report_view.setUrl(QUrl.fromLocalFile(filepath))
 
         index = self.tabs.addTab(report_view, title)
         self.tabs.setCurrentIndex(index)
-
-        watcher = QFileSystemWatcher([filepath], self)
-        watcher.fileChanged.connect(report_view.reload)
 
     def close_tab(self, index):
         if index == 0:
@@ -123,7 +148,8 @@ class OutputDock(QDockWidget):
             # self.setFixedHeight(self.restore_height)
             main_window.centralWidget().show()
             self.is_maximized = False
-            self.maximize_button.setText("Maximize")
+            # self.maximize_button.setText("Maximize")
+            self.maximize_button.setIcon(self.maximize_icon)
         else:
             if self.restore_height == 0:
                 self.restore_height = self.height()
@@ -134,7 +160,8 @@ class OutputDock(QDockWidget):
             # self.setFixedHeight(maximized_height)
             main_window.centralWidget().hide()
             self.is_maximized = True
-            self.maximize_button.setText("Restore")
+            self.maximize_button.setIcon(self.restore_icon)
+            # self.maximize_button.setText("Restore")
 
     def _update_back_button_status(self):
         current_widget = self.property("current_log_widget")
@@ -150,3 +177,38 @@ class OutputDock(QDockWidget):
 
     def is_dock_maximized(self):
         return self.is_maximized
+
+    def _warmup_web_engine(self):
+        temp_view = QWebEngineView()
+        temp_view.deleteLater()
+
+    def _scroll_log(self, ok):
+        if not ok:
+            return
+
+        view = self.sender()
+        if not view:
+            return
+
+        def do_scroll():
+            try:
+                js_code = "window.scrollTo(0, document.body.scrollHeight);"
+                view.page().runJavaScript(js_code)
+            except RuntimeError as e:
+                if "has been deleted" in str(e):
+                    pass
+                else:
+                    raise
+
+        QTimer.singleShot(50, do_scroll)
+
+    def start_log_polling(self, interval_ms=1000):
+            self.log_polling_timer.start(interval_ms)
+
+    def stop_log_polling(self):
+        self.log_polling_timer.stop()
+
+    def _poll_active_log(self):
+        current_widget = self.tabs.currentWidget()
+        if isinstance(current_widget, QWebEngineView):
+            current_widget.reload()

@@ -707,7 +707,11 @@ class MainWindow(QMainWindow):
             self.menu_bar.run_button.setEnabled(False)
             self.menu_bar.stop_button.setEnabled(True)
 
+        self.output_dock.start_log_polling()
+
     def on_test_finished(self, exit_code):
+        self.output_dock.stop_log_polling()
+
         console = self.output_dock.get_console()
         if exit_code == 0:
             console.append("\n[INFO] Run finished successfully.")

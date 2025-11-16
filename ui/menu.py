@@ -1,8 +1,15 @@
 from PyQt6.QtGui import QAction, QKeySequence
-from PyQt6.QtWidgets import QMenuBar, QMessageBox, QToolBar, QToolButton
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QStyle
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtWidgets import (
+    QMenuBar,
+    QMessageBox,
+    QToolBar,
+    QToolButton,
+    QWidget,
+    QHBoxLayout,
+    QPushButton,
+    QStyle,
+)
 from core.commands import COMMANDS
 from models.test_scenario import TestScenarioModel
 from typing import TYPE_CHECKING
@@ -171,37 +178,37 @@ class MenuBar(QMenuBar):
             )
 
     def create_corner_run_toolbar(self):
-        """Super compact icons-only in corner"""
-        run_toolbar = QToolBar("Run", self)
-        run_toolbar.setAccessibleName("corner-toolbar")
-        run_toolbar.setMovable(False)
-        run_toolbar.setFloatable(False)
-        run_toolbar.setIconSize(QSize(14, 14))
+        toolbar_widget = QWidget()
+        toolbar_widget.setObjectName
+        toolbar_layout = QHBoxLayout(toolbar_widget)
+        toolbar_layout.setContentsMargins(5, 0, 5, 0)
+        toolbar_layout.setSpacing(1)
 
-        # Add buttons (same as above)
-        self.run_button = QToolButton()
-        self.run_button.setText("▶")
+        self.run_button = QPushButton("▶")
         self.run_button.setToolTip("Run Current Module (Ctrl+R)")
         self.run_button.clicked.connect(self.run_current_module)
+        self.run_button.setFlat(True)
         self.run_button.setObjectName("RunButton")
-        run_toolbar.addWidget(self.run_button)
+        toolbar_layout.addWidget(self.run_button)
 
-        self.stop_button = QToolButton()
-        self.stop_button.setText("■")
+        self.stop_button = QPushButton("■")
         self.stop_button.setToolTip("Stop Execution (Ctrl+Shift+R)")
         self.stop_button.clicked.connect(self.stop_test)
+        self.stop_button.setFlat(True)
         self.stop_button.setObjectName("StopButton")
         self.stop_button.setEnabled(False)
-        run_toolbar.addWidget(self.stop_button)
+        toolbar_layout.addWidget(self.stop_button)
 
-        self.config_button = QToolButton()
-        self.config_button.setText("⚙")
+        self.config_button = QPushButton("⚙")
         self.config_button.setToolTip("Run Configuration")
         self.config_button.clicked.connect(self.show_run_config)
+        self.config_button.setFlat(True)
         self.config_button.setObjectName("ConfigButton")
-        run_toolbar.addWidget(self.config_button)
+        toolbar_layout.addWidget(self.config_button)
 
-        self.main.menuBar().setCornerWidget(run_toolbar, Qt.Corner.TopRightCorner)
+        toolbar_layout.addStretch()
+
+        self.main.menuBar().setCornerWidget(toolbar_widget, Qt.Corner.TopRightCorner)
 
     def run_current_module(self):
         self.main.run_current_module()
