@@ -1,7 +1,9 @@
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView)
-from PyQt6.QtCore import Qt, QTimer, QModelIndex, QSettings
+import os
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView, QFileDialog)
+from PyQt6.QtCore import Qt, QTimer, QModelIndex, QSettings, QDateTime
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
-
+from core.log_finder import LogFinder
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 import re
 from .menu import MenuBar
@@ -13,7 +15,7 @@ from core import FileController
 from core.command_manager import CommandManager
 from core.undo_commands import EditCellCommand
 from models.run_config import RunConfig, get_base_url
-from .output_dock import ConsoleDock
+from .output_dock import OutputDock
 from core.test_runner import TestRunner
 from .run_config import RunConfigDialog
 from PyQt6.QtWidgets import QDialog
@@ -32,6 +34,9 @@ class MainWindow(QMainWindow):
         self.current_connected_stack = None
         self.last_find_index = QModelIndex()
 
+        self.settings = QSettings("TestEditor", "Settings")
+        self.e2e_dir = self.settings.value("e2e_dir", "")
+
         self.main_tab = QTabWidget()
         self.main_tab.setTabsClosable(True)
         self.main_tab.tabCloseRequested.connect(self.close_tab)
@@ -48,14 +53,17 @@ class MainWindow(QMainWindow):
         self.center_status_label.setObjectName("StatusLabel")
         self.center_status_label.hide()
         self._setup_find_and_replace()
-        self.create_shortcuts()
         self.test_runner = None
-        self.output_dock = None
+        self.output_dock = OutputDock(self)
+        # self.output_dock.setFixedHeight(int(self.height() * 0.3))
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
+        self.output_dock.open_log_button.clicked.connect(self._on_open_log_manually)
         self.run_settings = RunConfig()
         self.run_settings.load_from_settings()
 
         self.setup_run_toolbar()
 
+        self.create_shortcuts()
         self.setCentralWidget(self.main_tab)
         self.show_welcome_screen()
 
@@ -69,6 +77,19 @@ class MainWindow(QMainWindow):
 
         self.shortcut_ctrl_w = QShortcut(QKeySequence("Ctrl+W"), self)
         self.shortcut_ctrl_w.activated.connect(lambda: self.close_tab(self.main_tab.currentIndex()))
+
+        shortcut_maximize_dock = QShortcut(QKeySequence("Ctrl+M"), self)
+        shortcut_maximize_dock.activated.connect(self.output_dock.toggle_maximize)
+
+        shortcut_next_dock_tab = QShortcut(QKeySequence("Ctrl+PgDown"), self)
+        shortcut_next_dock_tab.activated.connect(self.navigate_dock_tabs_next)
+        shortcut_prev_dock_tab = QShortcut(QKeySequence("Ctrl+PgUp"), self)
+        shortcut_prev_dock_tab.activated.connect(self.navigate_dock_tabs_prev)
+
+        shortcut_log_back = QShortcut(QKeySequence("Alt+Left"), self)
+        shortcut_log_back.activated.connect(self.navigate_log_back)
+        shortcut_log_forward = QShortcut(QKeySequence("Alt+Right"), self)
+        shortcut_log_forward.activated.connect(self.navigate_log_forward)
 
     def switch_main_tab(self, index):
         if index < self.main_tab.count():
@@ -118,12 +139,13 @@ class MainWindow(QMainWindow):
     def close_tab(self, index):
         tab = self.main_tab.widget(index)
 
-        if tab.close_tab():
-            self.main_tab.removeTab(index)
-            tab.deleteLater()
+        if isinstance(tab, TabWidget):
+            if tab.close_tab():
+                self.main_tab.removeTab(index)
+                tab.deleteLater()
 
-            if self.main_tab.count() == 0:
-                self.show_welcome_screen()
+                if self.main_tab.count() == 0:
+                    self.show_welcome_screen()
 
     def on_tab_changed(self, index):
         if self.current_connected_stack:
@@ -533,9 +555,7 @@ class MainWindow(QMainWindow):
         return DarkTheme()
 
     def setup_run_toolbar(self):
-        self.output_dock = ConsoleDock(self)
         self.output_dock.clear_requested.connect(self.clear_output)
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
         self.console_shortcut = QShortcut(QKeySequence("Ctrl+`"), self)
         self.console_shortcut.activated.connect(self.toggle_console)
         self.output_dock.hide()
@@ -543,9 +563,17 @@ class MainWindow(QMainWindow):
     def toggle_console(self):
         if self.output_dock.isVisible():
             self.output_dock.hide()
+            self.centralWidget().show()
         else:
             self.output_dock.show()
             self.output_dock.raise_()
+
+            if self.output_dock.is_dock_maximized():
+                self.centralWidget().hide()
+
+    def clear_output(self):
+        console = self.output_dock.get_console()
+        console.clear()
 
     def run_current_module(self):
         tab = self.get_current_tab()
@@ -558,23 +586,23 @@ class MainWindow(QMainWindow):
             self.show_status_message("Current file is not a valid test module", "warning", 3000)
             return
 
-        if self.output_dock:
-            self.output_dock.clear_output()
+        console = self.output_dock.get_console()
 
         if self.output_dock.isHidden():
             self.output_dock.show()
 
         if not self.test_runner:
-            settings = QSettings("TestEditor", "Settings")
-            e2e_dir = settings.value("e2e_dir", "")
-            if not e2e_dir:
+            if not self.e2e_dir:
                 QMessageBox.warning(self, "E2E directory not set", "Set dir in open file menu")
                 return
-            self.test_runner = TestRunner(e2e_dir)
-            self.test_runner.output_received.connect(self.on_test_output)
-            self.test_runner.error_received.connect(self.on_test_error)
+            self.test_runner = TestRunner(self.e2e_dir)
+            self.test_runner.output_received.connect(console.append)
+            self.test_runner.error_received.connect(console.append)
             self.test_runner.process_finished.connect(self.on_test_finished)
             self.test_runner.process_started.connect(self.on_test_started)
+
+        console.clear()
+        self.output_dock.tabs.setCurrentWidget(console)
 
         url = getattr(self, 'current_run_url', None) or get_base_url(tab.project_name)
 
@@ -587,7 +615,15 @@ class MainWindow(QMainWindow):
             wait_time=self.run_settings.wait_time
         )
 
+        start_time = QDateTime.currentDateTime()
+        project = config.project_name
+        module = config.module_name
+        logs_dir = os.path.join(self.e2e_dir, "logs")
+
+        self.log_finder = LogFinder(start_time, project, module, logs_dir)
+        self.log_finder.log_found.connect(self._on_log_found)
         self.test_runner.run_test(config)
+
 
     def stop_test(self):
         if self.test_runner and self.test_runner.is_test_running():
@@ -651,37 +687,62 @@ class MainWindow(QMainWindow):
             y = screen_geometry.top() + 50
             dialog.move(x, y)
 
-    def on_test_started(self):
-        self.output_dock.set_status("Running...")
-        tab = self.get_current_tab()
-        if tab:
-            self.output_dock.log_test_start(tab.project_name, tab.module_name)
+    def _on_log_found(self, filepath):
+        parts = os.path.basename(filepath).split('_')
+        title = f"{parts[0]}/{parts[2]}"
+        self.output_dock.open_log_tab(filepath, title)
 
+    def _on_open_log_manually(self):
+        if not self.e2e_dir:
+            return
+        logs_dir = os.path.join(self.e2e_dir, "logs")
+        filepath, _ = QFileDialog.getOpenFileName(self, "Open Log File", logs_dir, "HTML Files (*.html)")
+        if filepath:
+            parts = os.path.basename(filepath).split('_')
+            title = f"{parts[0]}/{parts[2]}"
+            self.output_dock.open_log_tab(filepath, title)
+
+    def on_test_started(self):
         if hasattr(self.menu_bar, 'run_button'):
             self.menu_bar.run_button.setEnabled(False)
             self.menu_bar.stop_button.setEnabled(True)
 
-    def on_test_output(self, message):
-        self.output_dock.log_maven_output(message)
-
-    def on_test_error(self, message):
-        self.output_dock.log(message)
-
     def on_test_finished(self, exit_code):
-        self.output_dock.log_test_result(exit_code)
-        self.output_dock.set_status("Completed" if exit_code == 0 else "Failed", exit_code != 0)
+        console = self.output_dock.get_console()
+        if exit_code == 0:
+            console.append("\n[INFO] Run finished successfully.")
+            self.show_status_message("Run Completed", "success", 5000)
+        if exit_code != 0:
+            console.append(f"\n[ERROR] Run finished with exit code: {exit_code}.")
+            self.show_status_message("Run Failed", "error", 5000)
 
         if hasattr(self.menu_bar, 'run_button'):
             self.menu_bar.run_button.setEnabled(True)
             self.menu_bar.stop_button.setEnabled(False)
 
-        status = "success" if exit_code == 0 else "error"
-        self.show_status_message(f"Run {'completed' if exit_code == 0 else 'failed to execute'}", status, 5000)
+    # Shortcuts for dock
 
-    def clear_output(self):
-        if self.output_dock:
-            self.output_dock.clear_output()
+    def navigate_dock_tabs_next(self):
+         current_index = self.output_dock.tabs.currentIndex()
+         count = self.output_dock.tabs.count()
+         new_index = (current_index + 1) % count
+         self.output_dock.tabs.setCurrentIndex(new_index)
 
+    def navigate_dock_tabs_prev(self):
+        current_index = self.output_dock.tabs.currentIndex()
+        count = self.output_dock.tabs.count()
+        new_index = (current_index - 1 + count) % count
+        self.output_dock.tabs.setCurrentIndex(new_index)
+
+    def navigate_log_back(self):
+        current_widget = self.output_dock.tabs.currentWidget()
+        if isinstance(current_widget, QWebEngineView):
+            current_widget.back()
+
+    def navigate_log_forward(self):
+        current_widget = self.output_dock.tabs.currentWidget()
+        if isinstance(current_widget, QWebEngineView):
+            current_widget.forward()
 
 
 

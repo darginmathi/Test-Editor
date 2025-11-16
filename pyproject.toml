@@ -7,7 +7,9 @@ requires-python = ">=3.12"
 dependencies = [
     "openpyxl>=3.1.5",
     "pandas>=2.3.3",
-    "pyqt6>=6.9.1",
+    "pyqt6[webengine]>=6.10.0",
+    "pyqt6-qt6>=6.10.0",
     "qtwidgets>=1.1",
     "ruff>=0.13.2",
+    "pyqt6-webengine>=6.10.0",
 ]

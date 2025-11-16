@@ -1,6 +1,7 @@
 from PyQt6.QtCore import QObject, QProcess, pyqtSignal, QProcessEnvironment, QTimer
 from models.run_config import RunConfig
 import os
+import subprocess
 
 # MAVEN_EXECUTABLE_PATH = "C:\\Users\\meetd\\Downloads\\apache-maven-3.9.10-bin\\apache-maven-3.9.10\\bin\\mvn.cmd"
 MAVEN_EXECUTABLE_PATH = "mvn"
@@ -16,16 +17,13 @@ class TestRunner(QObject):
         self.e2e_dir = e2e_dir
         self.process = None
         self.is_running = False
-        self._force_kill_timer = QTimer()
-        self._force_kill_timer.setSingleShot(True)
-        self._force_kill_timer.timeout.connect(self._force_kill_process)
+        self.is_stopping = False
 
     def run_test(self, config: RunConfig):
         if self.is_running:
             self.output_received.emit("✗ Test already running! Stop it first.")
             return
 
-        # Verify directory and pom.xml
         if not os.path.exists(self.e2e_dir):
             self.error_received.emit(f"✗ E2E directory does not exist: {self.e2e_dir}")
             return
@@ -40,7 +38,7 @@ class TestRunner(QObject):
         self.process = QProcess()
         self.process.setWorkingDirectory(self.e2e_dir)
 
-        # Use system environment as-is (your PATH already has everything needed)
+        # Use system environment
         env = QProcessEnvironment.systemEnvironment()
 
         # Just set JAVA_HOME since it's missing
@@ -55,6 +53,7 @@ class TestRunner(QObject):
         self.process.errorOccurred.connect(self._on_error)
 
         self.is_running = True
+        self.is_stopping = False
         self.process_started.emit()
         self.output_received.emit(f"[INFO] Starting test: {config.project_name}/{config.module_name}")
 
@@ -73,20 +72,16 @@ class TestRunner(QObject):
         ]
 
     def stop_test(self):
-        if not self.is_running or not self.process:
+        if not self.is_running or not self.process or self.is_stopping:
             return
 
+        self.is_stopping = True
         self.output_received.emit("[INFO] Stopping test execution...")
-        self.process.terminate()
 
-        self._force_kill_timer.start(3000)
+        pid = self.process.processId()
 
-    def _force_kill_process(self):
-        if self.is_running and self.process and self.process.state() == QProcess.ProcessState.Running:
-            self.process.kill()
-            self.output_received.emit("[INFO] Force killed process")
-            self.is_running = False
-            self.output_received.emit("[INFO] Test stopped")
+        if pid:
+            subprocess.run(f"taskkill /F /T /PID {pid}", capture_output=True, text=True)
 
     def _on_stdout(self):
         if self.process:
@@ -100,7 +95,7 @@ class TestRunner(QObject):
 
     def _on_finished(self, exit_code):
         self.is_running = False
-        self._force_kill_timer.stop()
+        self.is_stopping = False
         self.process_finished.emit(exit_code)
 
     def is_test_running(self):
@@ -108,11 +103,9 @@ class TestRunner(QObject):
 
     def cleanup(self):
         if self.process:
-            self._force_kill_timer.stop()
-
-            if self.process.state() == QProcess.ProcessState.Running:
-                self.process.kill()
-                self.process.waitForFinished(100)
+            pid = self.process.processId()
+            if pid:
+                subprocess.run(f"taskkill /F /T /PID {pid}", capture_output=True, text=True)
 
             try:
                 self.process.readyReadStandardOutput.disconnect()
@@ -122,9 +115,8 @@ class TestRunner(QObject):
             except:
                 pass
 
-            self.process = None
-
         self.is_running = False
+        self.is_stopping = False
 
     def _on_error(self, error: QProcess.ProcessError):
         error_messages = {
