@@ -5,6 +5,7 @@ from PyQt6.QtGui import QColor, QPalette
 
 from core.undo_commands import EditCellCommand
 from models import TestScenarioModel, ObjRepoModel
+from core.commands import COMMAND_ARGS
 
 class ComboBoxDelegate(QStyledItemDelegate):
     def __init__(self, parent, undo_stack, commands, colors):
@@ -266,5 +267,36 @@ class ComboBoxDelegate(QStyledItemDelegate):
         #         painter.restore()
 
         super().paint(painter, option, index)
+
+        # Placeholder drawing logic
+        if isinstance(model, TestScenarioModel) and not is_special_row:
+            # Check if it's a data column
+            if TestScenarioModel.DATA1_COL <= current_col <= TestScenarioModel.DATA5_COL:
+                cell_value = model.data(index, Qt.ItemDataRole.DisplayRole)
+
+                # Only draw placeholder if the cell is empty
+                if not cell_value:
+                    command_index = model.index(current_row, TestScenarioModel.COMMAND_COL)
+                    command_name = model.data(command_index, Qt.ItemDataRole.DisplayRole)
+
+                    if command_name in COMMAND_ARGS:
+                        args = COMMAND_ARGS[command_name]
+                        arg_index = current_col - TestScenarioModel.DATA1_COL
+
+                        if arg_index < len(args):
+                            placeholder_text = f"<{args[arg_index]}>"
+
+                            # Set font and color for placeholder
+                            font = painter.font()
+                            painter.setFont(font)
+                            painter.setPen(QColor(Qt.GlobalColor.gray))
+
+                            # Draw the text
+                            painter.drawText(option.rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, placeholder_text)
+
+                            # Restore original font and pen for subsequent drawing
+                            painter.setFont(option.font)
+                            painter.setPen(option.palette.color(QPalette.ColorRole.Text))
+
 
 

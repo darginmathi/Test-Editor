@@ -543,12 +543,16 @@ class MainWindow(QMainWindow):
             msg_box.exec()
 
             if msg_box.clickedButton() == discard_button:
-                self.test_runner.stop_test()
-                self.test_runner.cleanup()
+                if self.test_runner:
+                    self.test_runner.stop_test()
+                    self.test_runner.cleanup()
                 event.accept()
             else:
                 event.ignore()
         else:
+            if self.test_runner:
+                self.test_runner.stop_test()
+                self.test_runner.cleanup()
             event.accept()
 
     def get_current_colors(self):
