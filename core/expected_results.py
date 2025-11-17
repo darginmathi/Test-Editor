@@ -161,12 +161,8 @@ EXPECTED_RESULTS = {
     "EC_LASTLOGINVERIFICATION": "Last login timestamp for {value1} successfully verified.",
     "EC_DELETEEXISTINGPAGE": "Existing page successfully deleted.",
     "EC_VALIDATEDAILYVOLWEIGHTED": "Daily vol weighted successfully validated.",
-    "FWC_VERIFYBUTTONTEXT": "Successfully verified {value1} button text is {value2}.",
-    "FWC_GETELEMENTTEXT": "Successfully got text from {value1}.",
-    "FWC_VERIFYBULKDATA": "Successfully verified bulk data {value1}.",
-    "FWC_SETTLEPRICINGSCREEN": "Pricing screen successfully settled.",
-    "FWC_WAITFORELEMENTTOBEINTERACTABLE": "Element successfully became interactable.",
-    "FWC_MOUSEOVERBUTTON": "Successfully moused over {value1} button."
+    "FWC_MOUSEOVERBUTTON": "Successfully moused over {value1} button.",
+    "STARTAPPWITHLOGIN": "A successful login should happen.",
 }
 
 def get_expected_results(command, value1, value2):

@@ -163,12 +163,9 @@ STEPS_PERFORMED = {
     "EC_LASTLOGINVERIFICATION": "Verify last login timestamp for {value1}",
     "EC_DELETEEXISTINGPAGE": "Delete existing page",
     "EC_VALIDATEDAILYVOLWEIGHTED": "Validate daily vol weighted",
-    "FWC_VERIFYBUTTONTEXT": "Verify {value1} button text is {value2}",
-    "FWC_GETELEMENTTEXT": "Get text from {value1}",
-    "FWC_VERIFYBULKDATA": "Verify bulk data {value1}",
-    "FWC_SETTLEPRICINGSCREEN": "Settle pricing screen",
-    "FWC_WAITFORELEMENTTOBEINTERACTABLE": "Wait for element to be interactable",
     "FWC_MOUSEOVERBUTTON": "Mouse over {value1} button",
+    "STARTAPPWITHLOGIN": "Start app and login with {value1}",
+    "STOPAPP": "Close Application",
 }
 
 def get_steps_performed(command, value1, value2):

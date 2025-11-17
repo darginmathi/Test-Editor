@@ -117,7 +117,7 @@ COMMAND_ARGS = {
     "EC_QuoteIdInPtt": ["textBox", "cell"],
     "EC_VerifyDropdownValueNotExist": ["dropdown", "dropdownValue"],
     "EC_TradeIdComparison": ["button1", "label", "button2"],
-    "EC_VerifyAbsolutePremium": ["label", "textBox"],
+    "EC_VerifyAbsolutePremium": ["button1", "label1", "button2", "label2"],
     "EC_VerifyNegativeAbsolutePremium": ["label", "textBox"],
     "EC_VerifyRedColor": ["textBox"],
     "EC_VerifySolverAbosultePremium": ["textBox", "text"],
