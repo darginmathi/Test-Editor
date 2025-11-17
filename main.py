@@ -8,7 +8,7 @@ from PyQt6.QtGui import QIcon
 def main():
     app = QApplication(sys.argv)
     app.setApplicationName("Test Case Editor")
-    app.setApplicationVersion("0.3.0")
+    app.setApplicationVersion("0.6.1")
     app.setWindowIcon(QIcon("resources/testeditor_logo.PNG"))
     style_sheet = get_stylesheet(DarkTheme)
     app.setStyleSheet(style_sheet)

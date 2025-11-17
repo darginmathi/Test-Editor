@@ -16,8 +16,8 @@ class OutputDock(QDockWidget):
 
         title_bar = QWidget()
         title_bar_layout = QHBoxLayout(title_bar)
-        title_bar_layout.setContentsMargins(5, 0, 5, 0)
-        title_bar_layout.setSpacing(1)
+        title_bar_layout.setContentsMargins(5, 5, 5, 0)
+        title_bar_layout.setSpacing(5)
 
         title_bar_layout.addStretch()
 
@@ -33,34 +33,42 @@ class OutputDock(QDockWidget):
 
         self.back_button = QPushButton("◀")
         self.forward_button = QPushButton("▶")
+        self.refresh_button = QPushButton("⟳")
         self.maximize_button = QPushButton(icon=self.maximize_icon)
         self.open_log_button = QPushButton(icon=open_log_icon)
 
         self.back_button.setObjectName("DockTitleBarButton")
         self.forward_button.setObjectName("DockTitleBarButton")
+        self.refresh_button.setObjectName("DockTitleBarButton")
         self.maximize_button.setObjectName("DockTitleBarButton")
         self.open_log_button.setObjectName("DockTitleBarButton")
 
         self.back_button.hide()
         self.forward_button.hide()
+        self.refresh_button.hide()
 
         title_bar_layout.addWidget(self.back_button)
         title_bar_layout.addWidget(self.forward_button)
+        title_bar_layout.addWidget(self.refresh_button)
         title_bar_layout.addWidget(self.open_log_button)
         title_bar_layout.addWidget(self.maximize_button)
 
         self.back_button.setFlat(True)
         self.forward_button.setFlat(True)
+        self.refresh_button.setFlat(True)
         self.open_log_button.setFlat(True)
         self.maximize_button.setFlat(True)
 
         self.back_button.setToolTip("Go Back (Alt+Left)")
         self.forward_button.setToolTip("Go Forward (Alt+Right)")
+        self.refresh_button.setToolTip("Refresh (F5)")
         self.open_log_button.setToolTip("Open Log File")
         self.maximize_button.setToolTip("Maximize/Restore Dock (Ctrl+M)")
 
         self.setTitleBarWidget(title_bar)
         self.maximize_button.clicked.connect(self.toggle_maximize)
+        self.refresh_button.clicked.connect(self.refresh_current_view)
+
 
         container = QWidget()
         layout = QVBoxLayout(container)
@@ -80,9 +88,6 @@ class OutputDock(QDockWidget):
         self.tabs.tabBar().setTabButton(0, QTabBar.ButtonPosition.RightSide, None)
         self.tabs.currentChanged.connect(self.on_tab_changed)
 
-        self.log_polling_timer = QTimer(self)
-        self.log_polling_timer.timeout.connect(self._poll_active_log)
-
         self._warmup_web_engine()
 
     def get_console(self):
@@ -90,7 +95,6 @@ class OutputDock(QDockWidget):
 
     def open_log_tab(self, filepath, title):
         report_view = QWebEngineView()
-        report_view.loadFinished.connect(self._scroll_log)
         report_view.setUrl(QUrl.fromLocalFile(filepath))
 
         index = self.tabs.addTab(report_view, title)
@@ -120,6 +124,7 @@ class OutputDock(QDockWidget):
         if isinstance(current_widget, QWebEngineView):
             self.back_button.show()
             self.forward_button.show()
+            self.refresh_button.show()
 
             page = current_widget.page()
 
@@ -135,6 +140,7 @@ class OutputDock(QDockWidget):
         else:
             self.back_button.hide()
             self.forward_button.hide()
+            self.refresh_button.hide()
 
     def toggle_maximize(self):
         main_window = self.parent()
@@ -175,40 +181,38 @@ class OutputDock(QDockWidget):
             page = current_widget.page()
             self.forward_button.setEnabled(page.action(QWebEnginePage.WebAction.Forward).isEnabled())
 
+    def refresh_current_view(self):
+        current_widget = self.tabs.currentWidget()
+        if isinstance(current_widget, QWebEngineView):
+            def get_scroll_and_refresh(scroll_y):
+                url = current_widget.url().toLocalFile()
+                if not url:
+                    return
+
+                try:
+                    with open(url, 'r', encoding='utf-8') as f:
+                        new_html = f.read()
+
+                    js_html = new_html.replace('\\', '\\\\').replace('`', '\\`').replace('$', '\\$')
+
+                    js_code = f"""
+                        document.documentElement.innerHTML = `{js_html}`;
+                        window.scrollTo(0, {scroll_y});
+                    """
+                    current_widget.page().runJavaScript(js_code)
+
+                except FileNotFoundError:
+                    current_widget.reload() # Fallback
+
+            current_widget.page().runJavaScript("window.scrollY;", 0, get_scroll_and_refresh)
+
     def is_dock_maximized(self):
         return self.is_maximized
+
 
     def _warmup_web_engine(self):
         temp_view = QWebEngineView()
         temp_view.deleteLater()
 
-    def _scroll_log(self, ok):
-        if not ok:
-            return
 
-        view = self.sender()
-        if not view:
-            return
 
-        def do_scroll():
-            try:
-                js_code = "window.scrollTo(0, document.body.scrollHeight);"
-                view.page().runJavaScript(js_code)
-            except RuntimeError as e:
-                if "has been deleted" in str(e):
-                    pass
-                else:
-                    raise
-
-        QTimer.singleShot(50, do_scroll)
-
-    def start_log_polling(self, interval_ms=1000):
-            self.log_polling_timer.start(interval_ms)
-
-    def stop_log_polling(self):
-        self.log_polling_timer.stop()
-
-    def _poll_active_log(self):
-        current_widget = self.tabs.currentWidget()
-        if isinstance(current_widget, QWebEngineView):
-            current_widget.reload()

@@ -181,8 +181,8 @@ class MenuBar(QMenuBar):
         toolbar_widget = QWidget()
         toolbar_widget.setObjectName
         toolbar_layout = QHBoxLayout(toolbar_widget)
-        toolbar_layout.setContentsMargins(5, 0, 5, 0)
-        toolbar_layout.setSpacing(1)
+        toolbar_layout.setContentsMargins(5, 5, 5, 0)
+        toolbar_layout.setSpacing(5)
 
         self.run_button = QPushButton("▶")
         self.run_button.setToolTip("Run Current Module (Ctrl+R)")

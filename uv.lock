@@ -300,7 +300,6 @@ source = { virtual = "." }
 dependencies = [
     { name = "openpyxl" },
     { name = "pandas" },
-    { name = "pyqt6" },
     { name = "pyqt6-qt6" },
     { name = "pyqt6-webengine" },
     { name = "qtwidgets" },
@@ -311,7 +310,6 @@ dependencies = [
 requires-dist = [
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=2.3.3" },
-    { name = "pyqt6", extras = ["webengine"], specifier = ">=6.10.0" },
     { name = "pyqt6-qt6", specifier = ">=6.10.0" },
     { name = "pyqt6-webengine", specifier = ">=6.10.0" },
     { name = "qtwidgets", specifier = ">=1.1" },
