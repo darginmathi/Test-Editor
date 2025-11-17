@@ -39,6 +39,7 @@ class MainWindow(QMainWindow):
 
         self.main_tab = QTabWidget()
         self.main_tab.setTabsClosable(True)
+        self.main_tab.tabBar().setMovable(True)
         self.main_tab.tabCloseRequested.connect(self.close_tab)
         self.main_tab.currentChanged.connect(self.on_tab_changed)
 

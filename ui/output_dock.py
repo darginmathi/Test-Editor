@@ -77,6 +77,7 @@ class OutputDock(QDockWidget):
 
         self.tabs = QTabWidget()
         self.tabs.setTabsClosable(True)
+        self.tabs.tabBar().setMovable(True)
         self.tabs.tabCloseRequested.connect(self.close_tab)
         layout.addWidget(self.tabs)
 
