@@ -66,7 +66,7 @@ If a pre-made .exe is not available, you can build it yourself using the instruc
     git clone https://github.com/darginmathi/Test-Editor
     cd Test-Editor
     uv sync
-    uv run pyinstaller --onefile --noconsole --name "KDD IDE" --add-data "resources;resources" main.py
+    uv run pyinstaller --onefile --noconsole --name "Test Editor" --add-data "resources;resources" main.py
     ```
 
     **Find Your Application:**

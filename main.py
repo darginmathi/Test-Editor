@@ -15,7 +15,7 @@ def resource_path(relative_path):
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("KDD IDE")
+    app.setApplicationName("Test Editor")
     app.setApplicationVersion("1.0.1")
     app.setWindowIcon(QIcon(resource_path("resources/testeditor_logo.PNG")))
     style_sheet = get_stylesheet(DarkTheme)
