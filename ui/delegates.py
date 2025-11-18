@@ -207,6 +207,12 @@ class ComboBoxDelegate(QStyledItemDelegate):
         option = QStyleOptionViewItem(option)
         is_special_row = False
 
+        # Make selected text bold
+        if option.state & QStyle.StateFlag.State_Selected:
+            font = option.font
+            font.setBold(True)
+            option.font = font
+
         if isinstance(model, TestScenarioModel):
             if (current_row == 0 or
                 current_row == 1 or

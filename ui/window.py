@@ -1,5 +1,5 @@
 import os
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView, QFileDialog)
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView, QFileDialog, QStyle)
 from PyQt6.QtCore import Qt, QTimer, QModelIndex, QSettings, QDateTime
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 from core.log_finder import LogFinder
@@ -50,23 +50,34 @@ class MainWindow(QMainWindow):
         self.command_manager.commandsReloaded.connect(self._update_delegates_command_list)
 
         self.menu_bar = MenuBar(self)
+        self.output_dock = OutputDock(self)
+        # self.output_dock.setFixedHeight(int(self.height() * 0.3))
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
+        self.output_dock.open_log_button.clicked.connect(self._on_open_log_manually)
+        self.output_dock.hide() # Ensure it's hidden by default
+
         self.setup_status_bar()
         self.center_status_label.setObjectName("StatusLabel")
         self.center_status_label.hide()
         self._setup_find_and_replace()
         self.test_runner = None
-        self.output_dock = OutputDock(self)
-        # self.output_dock.setFixedHeight(int(self.height() * 0.3))
-        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
-        self.output_dock.open_log_button.clicked.connect(self._on_open_log_manually)
+        self.output_dock.clear_requested.connect(self.clear_output)
+        self.console_shortcut = QShortcut(QKeySequence("Ctrl+`"), self)
+        self.console_shortcut.activated.connect(self.toggle_console)
+        self.output_dock.visibilityChanged.connect(self._on_output_dock_visibility_changed)
         self.run_settings = RunConfig()
         self.run_settings.load_from_settings()
 
         self.setup_run_toolbar()
-
         self.create_shortcuts()
         self.setCentralWidget(self.main_tab)
         self.show_welcome_screen()
+
+    def _on_output_dock_visibility_changed(self, visible):
+        self.show_output_button.setVisible(not visible)
+
+    def set_e2e_dir(self, directory):
+        self.e2e_dir = directory
 
     def create_shortcuts(self):
         for i in range(1, 10):
@@ -91,6 +102,16 @@ class MainWindow(QMainWindow):
         shortcut_log_back.activated.connect(self.navigate_log_back)
         shortcut_log_forward = QShortcut(QKeySequence("Alt+Right"), self)
         shortcut_log_forward.activated.connect(self.navigate_log_forward)
+
+        # New shortcuts for Run, Stop, Config
+        self.shortcut_run = QShortcut(QKeySequence("Ctrl+R"), self)
+        self.shortcut_run.activated.connect(self.run_current_module)
+
+        self.shortcut_stop = QShortcut(QKeySequence("Ctrl+Shift+R"), self)
+        self.shortcut_stop.activated.connect(self.stop_test)
+
+        self.shortcut_config = QShortcut(QKeySequence("Ctrl+Alt+R"), self)
+        self.shortcut_config.activated.connect(self.show_run_config)
 
     def switch_main_tab(self, index):
         if index < self.main_tab.count():
@@ -242,6 +263,15 @@ class MainWindow(QMainWindow):
 
         self.status_bar.insertWidget(0, self.undo_status_label)
 
+        self.show_output_button = QPushButton("/\\")
+        self.show_output_button.setObjectName("StatusBarButton")
+        self.show_output_button.setToolTip("Console (Ctrl+`)")
+        self.show_output_button.clicked.connect(self.output_dock.show)
+        self.status_bar.addPermanentWidget(self.show_output_button)
+
+        separator_output = QLabel("|")
+        self.status_bar.addPermanentWidget(separator_output)
+
         self.status_bar.addPermanentWidget(self.zoom_out_button)
         self.status_bar.addPermanentWidget(self.zoom_label)
         self.status_bar.addPermanentWidget(self.zoom_in_button)
@@ -345,7 +375,7 @@ class MainWindow(QMainWindow):
         instructions.setProperty("class", "welcome-instructions")
         instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        tips = QLabel("• Use Ctrl+N to create a new test case\n• Use Ctrl+O to open existing test cases\n• Use Ctrl+R to auto-adjust cell sizes")
+        tips = QLabel("• Use Ctrl+N to create a new test case\n• Use Ctrl+O to open existing test cases\n• Use Ctrl+R to Run current module")
         tips.setProperty("class", "welcome-tips")
         tips.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
@@ -561,11 +591,9 @@ class MainWindow(QMainWindow):
 
     def setup_run_toolbar(self):
         self.output_dock.clear_requested.connect(self.clear_output)
-        self.console_shortcut = QShortcut(QKeySequence("Ctrl+`"), self)
-        self.console_shortcut.activated.connect(self.toggle_console)
-        self.output_dock.hide()
 
     def toggle_console(self):
+        print("toggle_console called")
         if self.output_dock.isVisible():
             self.output_dock.hide()
             self.centralWidget().show()

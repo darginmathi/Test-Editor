@@ -40,6 +40,7 @@ class FileController:
 
     def open_file(self):
         ui = FileUI(main=self.main,mode="open")
+        ui.e2e_dir_changed.connect(self.main.set_e2e_dir)
         if ui.exec() != QDialog.DialogCode.Accepted:
             return
 
@@ -79,12 +80,12 @@ class FileController:
             tab.model2.loadData(objects_df)
 
             scenario_table_view = tab.table1.table
-            scenario_table_view.setColumnWidth(0, 50)  # Type
-            scenario_table_view.setColumnWidth(1, 130) # ID
-            scenario_table_view.setColumnWidth(2, 50)  # Skip
-            scenario_table_view.setColumnWidth(3, 300) # Description
-            scenario_table_view.setColumnWidth(4, 350) # Steps Performed
-            scenario_table_view.setColumnWidth(5, 50) # Expected Results
+            scenario_table_view.setColumnWidth(0, 40)  # Type
+            scenario_table_view.setColumnWidth(1, 121) # ID
+            scenario_table_view.setColumnWidth(2, 30)  # Skip
+            scenario_table_view.setColumnWidth(3, 230) # Description
+            scenario_table_view.setColumnWidth(4, 290) # Steps Performed
+            scenario_table_view.setColumnWidth(5, 40) # Expected Results
             scenario_table_view.setColumnWidth(6, 250) # Command
             for col_index in range(7, 12):
                 scenario_table_view.setColumnWidth(col_index, 250)
@@ -130,6 +131,7 @@ class FileController:
             tab = self.main.get_current_tab()
 
         ui = FileUI(main=self.main,mode="save")
+        ui.e2e_dir_changed.connect(self.main.set_e2e_dir)
         if ui.exec() != QDialog.DialogCode.Accepted:
             return
 

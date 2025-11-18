@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QTableView, QHeaderView, QMenu, QInputDialog, QMessageBox
 from PyQt6.QtCore import Qt, pyqtSignal, QItemSelection, QModelIndex
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
+from models import TestScenarioModel
 
 class Table(QWidget):
     insertRowsRequested = pyqtSignal(int, int)
@@ -12,11 +13,12 @@ class Table(QWidget):
     skipRequested = pyqtSignal(list)
     unskipRequested = pyqtSignal(list)
 
-    def __init__(self, model, undo_stack=None, delegate=None):
+    def __init__(self, model, undo_stack=None, delegate=None, parent_tab=None):
         super().__init__()
         self.model = model
         self.undo_stack = undo_stack
         self.delegate = delegate
+        self.parent_tab = parent_tab
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -36,7 +38,8 @@ class Table(QWidget):
         h_header = self.table.horizontalHeader()
         v_header = self.table.verticalHeader()
         h_header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
-        v_header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
+        h_header.setMinimumHeight(20)
+        v_header.hide()
         self.auto_adjust_cells()
         self.table.setWordWrap(True)
         self.table.setAlternatingRowColors(False)
@@ -61,6 +64,16 @@ class Table(QWidget):
 
     def show_context_menu(self, position):
         menu = QMenu(self)
+        index = self.table.indexAt(position)
+
+        if self.parent_tab and isinstance(self.model, TestScenarioModel):
+            if index.isValid() and TestScenarioModel.DATA1_COL <= index.column() <= TestScenarioModel.DATA5_COL:
+                object_name = self.model.data(index, Qt.ItemDataRole.DisplayRole)
+                if object_name:
+                    go_to_definition_action = QAction("Go to Definition", self)
+                    go_to_definition_action.triggered.connect(lambda: self.parent_tab.go_to_object_definition(index))
+                    menu.addAction(go_to_definition_action)
+                    menu.addSeparator()
 
         insert_row_action = QAction("Insert Rows", self)
         insert_row_action.triggered.connect(self.insert_rows)
@@ -74,17 +87,18 @@ class Table(QWidget):
 
         menu.addSeparator()
 
-        mark_skip_action = QAction("Mark Skip", self)
-        mark_skip_action.triggered.connect(self.skip)
-        mark_skip_action.setShortcut("Ctrl+R")
-        menu.addAction(mark_skip_action)
+        if isinstance(self.model, TestScenarioModel):
+            mark_skip_action = QAction("Mark Skip", self)
+            mark_skip_action.triggered.connect(self.skip)
+            mark_skip_action.setShortcut("Ctrl+R")
+            menu.addAction(mark_skip_action)
 
-        mark_unskip_action = QAction("Mark Unskip", self)
-        mark_unskip_action.triggered.connect(self.unskip)
-        mark_unskip_action.setShortcut("Ctrl+T")
-        menu.addAction(mark_unskip_action)
+            mark_unskip_action = QAction("Mark Unskip", self)
+            mark_unskip_action.triggered.connect(self.unskip)
+            mark_unskip_action.setShortcut("Ctrl+T")
+            menu.addAction(mark_unskip_action)
 
-        menu.addSeparator()
+            menu.addSeparator()
 
         copy_action = QAction("Copy", self)
         copy_action.triggered.connect(self.copy_cells)
@@ -117,10 +131,10 @@ class Table(QWidget):
         self.remove_shortcut = QShortcut(QKeySequence("Ctrl+D"), self)
         self.remove_shortcut.activated.connect(self.remove_rows)
 
-        self.skip_shortcut = QShortcut(QKeySequence("Ctrl+R"), self)
+        self.skip_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
         self.skip_shortcut.activated.connect(self.skip)
 
-        self.unskip_shortcut = QShortcut(QKeySequence("Ctrl+T"), self)
+        self.unskip_shortcut = QShortcut(QKeySequence("Ctrl+Shift+T"), self)
         self.unskip_shortcut.activated.connect(self.unskip)
 
         self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self)
@@ -134,7 +148,6 @@ class Table(QWidget):
 
         self.clear_shortcut = QShortcut(QKeySequence("Delete"), self)
         self.clear_shortcut.activated.connect(self.clear_cells)
-
 
     def copy_cells(self):
         selection = self.table.selectionModel().selection()

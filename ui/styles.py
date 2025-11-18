@@ -161,11 +161,22 @@ def get_stylesheet(theme) -> str:
     }}
 
    /* Toolbar Run Control Buttons - Icon Colors Only */
-    QPushButton#RunButton {{
+       /* Container for dock button groups */
+    QWidget#RunToolbar {{
+        background-color: transparent;
+        border-top: none;
+        border-right: 2px solid {theme.BG};
         border-left: 2px solid {theme.BG};
-        border-top: 2px solid {theme.BG};
         border-bottom: 1px solid {theme.BORDER};
-        border-right: 1px solid {theme.BORDER};
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 6px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 6px;
+        padding: 0px;
+    }}
+
+    QPushButton#RunButton {{
+        border: none;
         background-color: transparent;
         padding: 2px;
         border-radius: 6px;
@@ -197,10 +208,7 @@ def get_stylesheet(theme) -> str:
     }}
 
     QPushButton#StopButton {{
-        border-left: 2px solid {theme.BG};
-        border-top: 2px solid {theme.BG};
-        border-bottom: 1px solid {theme.BORDER};
-        border-right: 1px solid {theme.BORDER};
+        border: none;
         background-color: transparent;
         padding: 2px;
         border-radius: 6px;
@@ -232,10 +240,7 @@ def get_stylesheet(theme) -> str:
     }}
 
     QPushButton#ConfigButton {{
-        border-left: 2px solid {theme.BG};
-        border-top: 2px solid {theme.BG};
-        border-bottom: 1px solid {theme.BORDER};
-        border-right: 1px solid {theme.BORDER};
+        border: none;
         background-color: transparent;
         padding: 2px;
         border-radius: 6px;
@@ -272,16 +277,25 @@ def get_stylesheet(theme) -> str:
         border: none;
         padding: 2px 4px;
         background-color: transparent;
+        border-radius: 6px;
         min-width: 15px;
         min-height: 15px;
     }}
 
     QPushButton#StatusBarButton:hover {{
         background-color: {theme.BG_LIGHT};
+        border-left: 1px solid {theme.BORDER};
+        border-top: 1px solid {theme.BORDER};
+        border-bottom: 1px solid {theme.BG};
+        border-right: 1px solid {theme.BG};
     }}
 
     QPushButton#StatusBarButton:pressed {{
         background-color: {theme.BG};
+        border-left: 2px solid {theme.BG};
+        border-top: 2px solid {theme.BG};
+        border-bottom: 1px solid {theme.BORDER};
+        border-right: 1px solid {theme.BORDER};
     }}
 
     QStatusBar::item {{
@@ -485,14 +499,40 @@ def get_stylesheet(theme) -> str:
         background-color: transparent;
     }}
 
+    /* Container for dock button groups */
+    QWidget#DockButtonContainerR {{
+        background-color: transparent;
+        border: 2px solid {theme.BG};
+        border-top: 2px solid {theme.BG};
+        border-right: none;
+        border-left: 2px solid {theme.BG};
+        border-bottom: 1px solid {theme.BORDER};
+        border-top-left-radius: 6px;
+        border-bottom-left-radius: 6px;
+        border-top-right-radius: 0px;
+        border-bottom-right-radius: 0px;
+        padding: 0px;
+    }}
 
+    /* Container for dock button groups */
+    QWidget#DockButtonContainerL {{
+        background-color: transparent;
+        border: none;
+        border: 2px solid {theme.BG};
+        border-top: 2px solid {theme.BG};
+        border-bottom: 1px solid {theme.BORDER};
+        border-left: none;
+        border-right: 1px solid {theme.BORDER};
+        border-top-left-radius: 0px;
+        border-bottom-left-radius: 0px;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        padding: 0px;
+    }}
 
     /* Output toolbar buttons (specific to output dock) */
     QPushButton#DockTitleBarButton {{
-        border-left: 2px solid {theme.BG};
-        border-top: 2px solid {theme.BG};
-        border-bottom: 1px solid {theme.BORDER};
-        border-right: 1px solid {theme.BORDER};
+        border: none;
         background-color: transparent;
         padding: 2px;
         border-radius: 6px;

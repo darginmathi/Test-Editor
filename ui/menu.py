@@ -159,12 +159,12 @@ class MenuBar(QMenuBar):
         if isinstance(tab, TabWidget) and tab.inner_tabs.currentIndex() == 0:
             scenario_table_view = tab.table1.table
 
-            scenario_table_view.setColumnWidth(0, 50)  # Type
-            scenario_table_view.setColumnWidth(1, 130) # ID
-            scenario_table_view.setColumnWidth(2, 50)  # Skip
-            scenario_table_view.setColumnWidth(3, 300) # Description
-            scenario_table_view.setColumnWidth(4, 350) # Steps Performed
-            scenario_table_view.setColumnWidth(5, 50) # Expected Results
+            scenario_table_view.setColumnWidth(0, 40)  # Type
+            scenario_table_view.setColumnWidth(1, 121) # ID
+            scenario_table_view.setColumnWidth(2, 30)  # Skip
+            scenario_table_view.setColumnWidth(3, 230) # Description
+            scenario_table_view.setColumnWidth(4, 290) # Steps Performed
+            scenario_table_view.setColumnWidth(5, 40) # Expected Results
             scenario_table_view.setColumnWidth(6, 250) # Command
             for col_index in range(7, 12):
                 scenario_table_view.setColumnWidth(col_index, 250)
@@ -179,9 +179,9 @@ class MenuBar(QMenuBar):
 
     def create_corner_run_toolbar(self):
         toolbar_widget = QWidget()
-        toolbar_widget.setObjectName
+        toolbar_widget.setObjectName("RunToolbar")
         toolbar_layout = QHBoxLayout(toolbar_widget)
-        toolbar_layout.setContentsMargins(5, 5, 5, 0)
+        toolbar_layout.setContentsMargins(5, 5, 5, 5)
         toolbar_layout.setSpacing(5)
 
         self.run_button = QPushButton("▶")
@@ -200,7 +200,7 @@ class MenuBar(QMenuBar):
         toolbar_layout.addWidget(self.stop_button)
 
         self.config_button = QPushButton("⚙")
-        self.config_button.setToolTip("Run Configuration")
+        self.config_button.setToolTip("Run Configuration (Ctrl+Alt+R)")
         self.config_button.clicked.connect(self.show_run_config)
         self.config_button.setFlat(True)
         self.config_button.setObjectName("ConfigButton")

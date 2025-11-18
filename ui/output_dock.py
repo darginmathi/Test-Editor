@@ -16,10 +16,8 @@ class OutputDock(QDockWidget):
 
         title_bar = QWidget()
         title_bar_layout = QHBoxLayout(title_bar)
-        title_bar_layout.setContentsMargins(5, 5, 5, 0)
+        title_bar_layout.setContentsMargins(0, 5, 0, 0)
         title_bar_layout.setSpacing(5)
-
-        title_bar_layout.addStretch()
 
         self.is_maximized = False
         self.restore_height = 0
@@ -30,45 +28,66 @@ class OutputDock(QDockWidget):
         open_log_icon = style.standardIcon(QStyle.StandardPixmap.SP_DialogOpenButton)
         self.maximize_icon = style.standardIcon(QStyle.StandardPixmap.SP_TitleBarMaxButton)
         self.restore_icon = style.standardIcon(QStyle.StandardPixmap.SP_TitleBarNormalButton)
+        self.minimize_icon = style.standardIcon(QStyle.StandardPixmap.SP_TitleBarMinButton)
 
         self.back_button = QPushButton("◀")
         self.forward_button = QPushButton("▶")
         self.refresh_button = QPushButton("⟳")
         self.maximize_button = QPushButton(icon=self.maximize_icon)
         self.open_log_button = QPushButton(icon=open_log_icon)
+        self.minimize_button = QPushButton(icon=self.minimize_icon)
 
         self.back_button.setObjectName("DockTitleBarButton")
         self.forward_button.setObjectName("DockTitleBarButton")
         self.refresh_button.setObjectName("DockTitleBarButton")
         self.maximize_button.setObjectName("DockTitleBarButton")
         self.open_log_button.setObjectName("DockTitleBarButton")
+        self.minimize_button.setObjectName("DockTitleBarButton")
 
         self.back_button.hide()
         self.forward_button.hide()
         self.refresh_button.hide()
 
-        title_bar_layout.addWidget(self.back_button)
-        title_bar_layout.addWidget(self.forward_button)
-        title_bar_layout.addWidget(self.refresh_button)
-        title_bar_layout.addWidget(self.open_log_button)
-        title_bar_layout.addWidget(self.maximize_button)
+        nav_container = QWidget()
+        nav_container.setObjectName("DockButtonContainerL")
+        nav_layout = QHBoxLayout(nav_container)
+        nav_layout.setContentsMargins(4, 4, 4, 4)
+        nav_layout.setSpacing(2)
+        nav_layout.addWidget(self.back_button)
+        nav_layout.addWidget(self.forward_button)
+        nav_layout.addWidget(self.refresh_button)
+
+        action_container = QWidget()
+        action_container.setObjectName("DockButtonContainerR")
+        action_layout = QHBoxLayout(action_container)
+        action_layout.setContentsMargins(4, 4, 4, 4)
+        action_layout.setSpacing(2)
+        action_layout.addWidget(self.open_log_button)
+        action_layout.addWidget(self.minimize_button)
+        action_layout.addWidget(self.maximize_button)
+
+        title_bar_layout.addWidget(nav_container)
+        title_bar_layout.addStretch()
+        title_bar_layout.addWidget(action_container)
 
         self.back_button.setFlat(True)
         self.forward_button.setFlat(True)
         self.refresh_button.setFlat(True)
         self.open_log_button.setFlat(True)
         self.maximize_button.setFlat(True)
+        self.minimize_button.setFlat(True)
 
-        self.back_button.setToolTip("Go Back (Alt+Left)")
-        self.forward_button.setToolTip("Go Forward (Alt+Right)")
+        self.back_button.setToolTip("Back (Alt+Left)")
+        self.forward_button.setToolTip("Forward (Alt+Right)")
         self.refresh_button.setToolTip("Refresh (F5)")
         self.open_log_button.setToolTip("Open Log File")
-        self.maximize_button.setToolTip("Maximize/Restore Dock (Ctrl+M)")
+        self.maximize_button.setToolTip("Maximize (Ctrl+M)")
+        self.minimize_button.setToolTip("Minimize (Ctrl+`)")
 
         self.setTitleBarWidget(title_bar)
+        self.minimize_button.clicked.connect(self.hide)
         self.maximize_button.clicked.connect(self.toggle_maximize)
         self.refresh_button.clicked.connect(self.refresh_current_view)
-
 
         container = QWidget()
         layout = QVBoxLayout(container)
@@ -188,6 +207,10 @@ class OutputDock(QDockWidget):
             def get_scroll_and_refresh(scroll_y):
                 url = current_widget.url().toLocalFile()
                 if not url:
+                    return
+
+                if not (url.lower().endswith(".html") or url.lower().endswith(".htm")):
+                    current_widget.reload()
                     return
 
                 try:

@@ -6,9 +6,10 @@ from PyQt6.QtWidgets import (
     QPushButton, QListWidgetItem, QFileDialog, QMessageBox,
     QSplitter, QWidget
 )
-from PyQt6.QtCore import Qt, QSettings
+from PyQt6.QtCore import Qt, QSettings, pyqtSignal
 
 class FileUI(QDialog):
+    e2e_dir_changed = pyqtSignal(str)
     def __init__(self,main = None, mode="open"):
         super().__init__(main)
         self.mode = mode
@@ -138,6 +139,7 @@ class FileUI(QDialog):
                 self._save_last_directory()
                 self._populate_projects()
                 self._load_last_project()
+                self.e2e_dir_changed.emit(self.e2e_dir)
             else:
                 QMessageBox.warning(self, "Invalid Directory",
                 "Selected directory should be the E2E application root with 'data/' subdirectory")

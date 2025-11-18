@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QTabWidget, QMessageBox, QVBoxLayout, QWidget
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QUndoStack, QFont
+from PyQt6.QtWidgets import QTabWidget, QMessageBox, QVBoxLayout, QWidget, QMenu, QAbstractItemView
+from PyQt6.QtCore import pyqtSignal, Qt, QModelIndex
+from PyQt6.QtGui import QUndoStack, QFont, QAction
 
 from models import TestScenarioModel, ObjRepoModel
 from .table import Table
@@ -29,7 +29,7 @@ class TabWidget(QWidget):
 
         self.delegate = ComboBoxDelegate(self, self.undo_stack, commands, colors)
 
-        self.table1 = Table(model=self.model1, undo_stack=self.undo_stack, delegate=self.delegate)
+        self.table1 = Table(model=self.model1, undo_stack=self.undo_stack, delegate=self.delegate, parent_tab=self)
         self.table2 = Table(model=self.model2, undo_stack=self.undo_stack, delegate=self.delegate)
 
         self.controller = TableController(main, self.undo_stack)
@@ -128,3 +128,46 @@ class TabWidget(QWidget):
 
     def on_object_model_changed(self):
         self.delegate.invalidate_objects_cache()
+
+    def is_object_in_repository(self, object_name):
+        if not object_name:
+            return False
+
+        object_name_column_in_obj_repo = 1 # Assuming 'User friendly name of Object' is the 2nd column (0-indexed)
+        found_indexes = self.model2.match(
+            self.model2.index(0, object_name_column_in_obj_repo),
+            Qt.ItemDataRole.DisplayRole,
+            object_name,
+            1, # Max 1 match
+            Qt.MatchFlag.MatchExactly
+        )
+        return bool(found_indexes)
+
+    def go_to_object_definition(self, scenario_index: QModelIndex):
+        object_name = self.model1.data(scenario_index, Qt.ItemDataRole.DisplayRole)
+        if not object_name:
+            self.main.show_status_message("Selected cell does not contain an object name.", "warning", 3000)
+            return
+
+        # Search for the object in the object repository model (self.model2)
+        # Assuming 'Object Name' is the first column in ObjRepoModel
+        object_name_column_in_obj_repo = 1 # Assuming 'User friendly name of Object' is the 2nd column (0-indexed)
+        found_indexes = self.model2.match(
+            self.model2.index(0, object_name_column_in_obj_repo),
+            Qt.ItemDataRole.DisplayRole,
+            object_name,
+            1, # Max 1 match
+            Qt.MatchFlag.MatchExactly
+        )
+
+        if found_indexes:
+            found_index = found_indexes[0]
+            # Switch to the Objects tab
+            self.inner_tabs.setCurrentIndex(1) # Assuming Objects tab is at index 1
+
+            # Select and scroll to the found object
+            self.table2.table.selectionModel().clearSelection()
+            self.table2.table.setCurrentIndex(found_index)
+            self.table2.table.scrollTo(found_index, QAbstractItemView.ScrollHint.PositionAtCenter)
+        else:
+            self.main.show_status_message(f"Object '{object_name}' not found in the Object Repository.", "warning", 3000)

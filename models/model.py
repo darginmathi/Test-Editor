@@ -46,9 +46,9 @@ class TableModel(QAbstractTableModel):
     def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
         if role == Qt.ItemDataRole.DisplayRole:
             if orientation == Qt.Orientation.Horizontal:
-                return chr(65 + section) if section <  26 else f"Col{section+1}"
+                return " "
             if orientation == Qt.Orientation.Vertical:
-                return str(section + 1)
+                return ""
         return None
 
     def flags(self, index):

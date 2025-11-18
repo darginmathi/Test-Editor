@@ -8,21 +8,25 @@ A user-friendly desktop application to edit test cases for keyword-driven testin
 
 ## Features
 
-* **Basic Spreadsheet Suite:** All the basic spreadsheet editing features you are used to.
-* **MultiTab Functionality:** MultiTab function to actively open and edit multiple tests.
-* **Custom File Explorer:** Custom built file explorer to move through project files.
-* **Command Manager:** Cross-file Command(functions)/Objects retrieval with dropdown in table for ease of use.
-* **Auto Update ID:** Auto Update ID (when inserting or removing rows).
-* **Smart Cell Merging:** Automatically merges the 'Description' column for test case blocks between StartScenario and EndScenario commands.
-* **Clean UI:** Clean and professional Dark mode UI/Light mode in the works.
+### Editing
+
+* **Intuitive Spreadsheet Interface:** All the basic spreadsheet editing features you are used to.
+* **Multi-Tab Functionality:** Open and edit multiple test cases in separate tabs.
+* **Auto Update ID:** Automatically update test step IDs when inserting or removing rows.
+* **Smart Cell Merging:** Automatically merge the 'Description' column for test case blocks.
+
+### Test Execution
+
+* **Run Tests:** Run test cases directly from the editor.
+* **Configurable Run Settings:** Configure the test execution with settings like project, module, base URL, browser, and video option.                 │
+* **Live Console Output:** View the live output of the test execution in the console panel.
+* **HTML Log Viewer:** Automatically open and view detailed HTML log files after a test run.
+
+### Project and File Management
+
+* **Custom File Explorer:** A built-in file explorer to navigate through your project files.
 * **Excel File Support:** Edit standard (`.xlsx`) test case files.
-
-## Upcoming Features
-
-* **Run:** Run TestCases directly from editor.
-* **Light Mode:** Light theme option for different preferences.
-* **Command Argument validation:** Syntax Highlighting on commands to indicate required arguments met.
-* **Navigate to Object Definition** Scenario -> Object Repo jump for quick editing of objects.
+* **Project Structure:** Works with a predefined project structure for test suites and object repositories.
 
 ## Known Issues
 
@@ -105,9 +109,8 @@ This project uses the following major libraries:
 * **Edit -> Generate Test Cases**
     > Generate steps performed and expected result based on the command, object and value.
 
-* Start editing with the intuitive spreadsheet interface
-
-* Use the multi-tab feature to work on multiple test files simultaneously.
+* **Run Icon**
+    > Run the current module based on the preset config for run.
 
 ## Contributing
 
