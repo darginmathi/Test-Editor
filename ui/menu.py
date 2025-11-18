@@ -1,14 +1,11 @@
 from PyQt6.QtGui import QAction, QKeySequence
-from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QMenuBar,
     QMessageBox,
-    QToolBar,
-    QToolButton,
     QWidget,
     QHBoxLayout,
     QPushButton,
-    QStyle,
 )
 from core.commands import COMMANDS
 from models.test_scenario import TestScenarioModel
@@ -126,7 +123,7 @@ class MenuBar(QMenuBar):
 
             reset_button = msg_box.addButton("Reset All", QMessageBox.ButtonRole.DestructiveRole)
             fill_empty_button = msg_box.addButton("Fill Empty", QMessageBox.ButtonRole.AcceptRole)
-            cancel_button = msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+            msg_box.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
 
             msg_box.setDefaultButton(fill_empty_button)
             msg_box.exec()

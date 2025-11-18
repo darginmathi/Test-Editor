@@ -1,5 +1,5 @@
 import os
-from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView, QFileDialog, QStyle)
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QTabWidget, QVBoxLayout, QMessageBox, QLabel, QStatusBar, QPushButton, QFrame, QTableView, QFileDialog)
 from PyQt6.QtCore import Qt, QTimer, QModelIndex, QSettings, QDateTime
 from PyQt6.QtGui import QAction, QKeySequence, QShortcut
 from core.log_finder import LogFinder
@@ -9,8 +9,7 @@ import re
 from .menu import MenuBar
 from .tab import TabWidget
 from .find_replace import FindReplace
-from .styles import DarkTheme, LightTheme
-from models import TableModel
+from .styles import DarkTheme
 from core import FileController
 from core.command_manager import CommandManager
 from core.undo_commands import EditCellCommand

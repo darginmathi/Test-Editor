@@ -1,7 +1,7 @@
 import pandas as pd
 from .model import TableModel
 
-from PyQt6.QtCore import QModelIndex, Qt, pyqtSignal
+from PyQt6.QtCore import QModelIndex, Qt
 from typing import Optional
 
 class TestScenarioModel(TableModel):

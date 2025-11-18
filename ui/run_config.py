@@ -1,7 +1,6 @@
-from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QHBoxLayout, QLabel,
+from PyQt6.QtWidgets import (QDialog, QVBoxLayout, QLabel,
                              QComboBox, QSpinBox, QDialogButtonBox,
-                             QGroupBox, QFormLayout, QLineEdit, QPushButton)
-from PyQt6.QtCore import Qt
+                             QGroupBox, QFormLayout)
 from models.run_config import RunConfig
 
 class RunConfigDialog(QDialog):

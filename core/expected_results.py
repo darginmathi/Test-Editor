@@ -1,4 +1,3 @@
-from .commands import COMMANDS
 
 EXPECTED_RESULTS = {
     "FWC_CLICKBUTTON": "Successfully clicked on {value1} button",
@@ -148,11 +147,9 @@ EXPECTED_RESULTS = {
     "EC_CHECKBUTTONNOTCLICKABLE": "Successfully checked button {value1} is not clickable",
     "EC_COMPAREBIDOFFERPRICES": "Successfully compared bid and offer prices for {value1} and {value2}",
     "EC_HANDLEPOPUPS": "Successfully handled popup",
-    "EC_SETINVALIDVALUESINDROPDOWN": "Invalid value(s) are not accepted in {value1} dropdown.",
     "EC_SETVOLTEXTBOX": "Successfully set {value2} in {value1} vol textbox.",
     "EC_RESETBIDOFFERVERIFICATION": "Bid/offer values are successfully reset for cells {value1}.",
     "EC_COMAPARETOOLTIPPREMIUM": "Tooltip premium values match for labels {value1}.",
-    "EC_SETINVALIDVALUESINTEXTBOX": "Invalid value(s) are not accepted in {value1} textbox, indicated by error.",
     "EC_VERIFYLABELSMATCH": "Labels successfully match.",
     "EC_VERIFYABSOLUTEPREMIUMTRADECONFO": "Absolute premium in trade confirmation successfully verified.",
     "EC_SELECTDATE": "Date successfully selected from the calendar.",

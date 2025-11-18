@@ -155,8 +155,11 @@ class TableController(QObject):
                     value2_index = model.index(row, TestScenarioModel.DATA2_COL)
                     value2 = model.data(value2_index, Qt.ItemDataRole.DisplayRole)
 
-                    if value1 is None: value1 = ""
-                    if value2 is None: value2 = ""
+                    if value1 is None:
+                        value1 = ""
+
+                    if value2 is None:
+                        value2 = ""
 
                     value1 = clean_object_name(value1)
                     value2 = value2

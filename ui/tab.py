@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QTabWidget, QMessageBox, QVBoxLayout, QWidget, QMenu, QAbstractItemView
+from PyQt6.QtWidgets import QTabWidget, QMessageBox, QVBoxLayout, QWidget, QAbstractItemView
 from PyQt6.QtCore import pyqtSignal, Qt, QModelIndex
-from PyQt6.QtGui import QUndoStack, QFont, QAction
+from PyQt6.QtGui import QUndoStack
 
 from models import TestScenarioModel, ObjRepoModel
 from .table import Table

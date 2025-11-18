@@ -1,4 +1,3 @@
-from .commands import COMMANDS
 
 STEPS_PERFORMED = {
     "STARTSCENARIO": "Scenario Started",
@@ -150,11 +149,9 @@ STEPS_PERFORMED = {
     "EC_CHECKBUTTONNOTCLICKABLE": "Check button {value1} is not clickable",
     "EC_COMPAREBIDOFFERPRICES": "Compare bid and offer prices for {value1} and {value2}",
     "EC_HANDLEPOPUPS": "Handle popup",
-    "EC_SETINVALIDVALUESINDROPDOWN": "Attempt to set invalid value(s) in {value1} dropdown",
     "EC_SETVOLTEXTBOX": "Set {value2} in {value1} vol textbox",
     "EC_RESETBIDOFFERVERIFICATION": "Verify bid/offer reset for cells {value1} with expected bids {value2}",
     "EC_COMAPARETOOLTIPPREMIUM": "Compare tooltip premium for labels {value1}",
-    "EC_SETINVALIDVALUESINTEXTBOX": "Attempt to set invalid value(s) in {value1} textbox",
     "EC_VERIFYLABELSMATCH": "Verify labels match",
     "EC_VERIFYABSOLUTEPREMIUMTRADECONFO": "Verify absolute premium in trade confirmation",
     "EC_SELECTDATE": "Select a date from the calendar",

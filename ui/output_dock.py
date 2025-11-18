@@ -1,10 +1,9 @@
 from PyQt6.QtWidgets import (QDockWidget, QTabWidget,  QTextEdit, QTabBar, QVBoxLayout, QWidget,
-                             QHBoxLayout, QPushButton, QLabel)
-from PyQt6.QtCore import Qt, pyqtSignal, QUrl, QFileSystemWatcher, QTimer
+                             QHBoxLayout, QPushButton)
+from PyQt6.QtCore import Qt, pyqtSignal, QUrl
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWebEngineCore import QWebEnginePage, QWebEngineHistory
+from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtWidgets import QStyle
-from PyQt6.QtWebEngineCore import QWebEngineProfile, QWebEngineScript
 
 
 class OutputDock(QDockWidget):

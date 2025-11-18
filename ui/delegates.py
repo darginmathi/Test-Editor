@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import (QStyledItemDelegate, QLineEdit, QComboBox,
-                             QCompleter, QStyleOptionViewItem, QApplication, QStyle)
-from PyQt6.QtCore import Qt, QModelIndex, QTimer, QStringListModel, QMetaObject
+                             QCompleter, QStyleOptionViewItem, QStyle)
+from PyQt6.QtCore import Qt, QModelIndex, QTimer, QStringListModel
 from PyQt6.QtGui import QColor, QPalette
 
 from core.undo_commands import EditCellCommand

@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QObject, QProcess, pyqtSignal, QProcessEnvironment, QTimer
+from PyQt6.QtCore import QObject, QProcess, pyqtSignal, QProcessEnvironment
 from models.run_config import RunConfig
 import os
 import subprocess
@@ -67,7 +67,7 @@ class TestRunner(QObject):
             "clean",
             "compile",
             "exec:java",
-            f"-Dexec.mainClass=com.startAuto.StartAuto",
+            "-Dexec.mainClass=com.startAuto.StartAuto",
             f"-Dexec.args={exec_args}"
         ]
 
@@ -112,7 +112,7 @@ class TestRunner(QObject):
                 self.process.readyReadStandardError.disconnect()
                 self.process.finished.disconnect()
                 self.process.errorOccurred.disconnect()
-            except:
+            except Exception:
                 pass
 
         self.is_running = False

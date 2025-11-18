@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import (QDialog, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout,
-                             QGridLayout, QCheckBox, QLabel, QDialogButtonBox)
+from PyQt6.QtWidgets import (QDialog, QLineEdit, QPushButton, QHBoxLayout,
+                             QGridLayout, QCheckBox, QLabel)
 from PyQt6.QtCore import pyqtSignal
 
 class FindReplace(QDialog):
