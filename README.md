@@ -70,7 +70,7 @@ If a pre-made .exe is not available, you can build it yourself using the instruc
     ```
 
     **Find Your Application:**
-    After the process finishes, a new folder called `dist` will be created inside your `Test-Editor` folder. Inside `dist`, you will find `TestEditor.exe`.
+    After the process finishes, a new folder called `dist` will be created inside your `Test-Editor` folder. Inside `dist`, you will find `Test Editor.exe`.
 
 ## Dependencies
 
