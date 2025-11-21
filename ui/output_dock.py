@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import QStyle
 
 class OutputDock(QDockWidget):
     clear_requested = pyqtSignal()
+    toggle_visibility_requested = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__("OUTPUT", parent)
@@ -84,7 +85,7 @@ class OutputDock(QDockWidget):
         self.minimize_button.setToolTip("Minimize (Ctrl+`)")
 
         self.setTitleBarWidget(title_bar)
-        self.minimize_button.clicked.connect(self.hide)
+        self.minimize_button.clicked.connect(self.toggle_visibility_requested.emit)
         self.maximize_button.clicked.connect(self.toggle_maximize)
         self.refresh_button.clicked.connect(self.refresh_current_view)
 

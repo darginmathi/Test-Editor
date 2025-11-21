@@ -12,15 +12,6 @@ wheels = [
 ]
 
 [[package]]
-name = "markdown"
-version = "3.9"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/8d/37/02347f6d6d8279247a5837082ebc26fc0d5aaeaf75aa013fcbb433c777ab/markdown-3.9.tar.gz", hash = "sha256:d2900fe1782bd33bdbbd56859defef70c2e78fc46668f8eb9df3128138f2cb6a", size = 364585, upload-time = "2025-09-04T20:25:22.885Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/70/ae/44c4a6a4cbb496d93c6257954260fe3a6e91b7bed2240e5dad2a717f5111/markdown-3.9-py3-none-any.whl", hash = "sha256:9f4d91ed810864ea88a6f32c07ba8bee1346c0cc1f6b1f9f6c822f2a9667d280", size = 107441, upload-time = "2025-09-04T20:25:21.784Z" },
-]
-
-[[package]]
 name = "numpy"
 version = "2.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -250,15 +241,6 @@ wheels = [
 ]
 
 [[package]]
-name = "qtwidgets"
-version = "1.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "markdown" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/eb/e4e5e238b8d570d748ac09dd81f057a32866b517fbf92b5d71a5c86e5e39/qtwidgets-1.1.tar.gz", hash = "sha256:97b8373844788a22c836f5a16a1e60c9ef1469bfc4aedc09ae786fc9aa0b49df", size = 14185, upload-time = "2023-01-23T12:33:04.763Z" }
-
-[[package]]
 name = "ruff"
 version = "0.13.2"
 source = { registry = "https://pypi.org/simple" }
@@ -302,7 +284,10 @@ dependencies = [
     { name = "pandas" },
     { name = "pyqt6-qt6" },
     { name = "pyqt6-webengine" },
-    { name = "qtwidgets" },
+]
+
+[package.optional-dependencies]
+dev = [
     { name = "ruff" },
 ]
 
@@ -312,9 +297,9 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "pyqt6-qt6", specifier = ">=6.10.0" },
     { name = "pyqt6-webengine", specifier = ">=6.10.0" },
-    { name = "qtwidgets", specifier = ">=1.1" },
-    { name = "ruff", specifier = ">=0.13.2" },
+    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.13.2" },
 ]
+provides-extras = ["dev"]
 
 [[package]]
 name = "tzdata"

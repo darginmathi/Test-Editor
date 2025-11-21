@@ -52,6 +52,7 @@ class MainWindow(QMainWindow):
         self.output_dock = OutputDock(self)
         # self.output_dock.setFixedHeight(int(self.height() * 0.3))
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.output_dock)
+        self.output_dock.toggle_visibility_requested.connect(self.toggle_console)
         self.output_dock.open_log_button.clicked.connect(self._on_open_log_manually)
         self.output_dock.hide() # Ensure it's hidden by default
 
@@ -265,7 +266,7 @@ class MainWindow(QMainWindow):
         self.show_output_button = QPushButton("/\\")
         self.show_output_button.setObjectName("StatusBarButton")
         self.show_output_button.setToolTip("Console (Ctrl+`)")
-        self.show_output_button.clicked.connect(self.output_dock.show)
+        self.show_output_button.clicked.connect(self.toggle_console)
         self.status_bar.addPermanentWidget(self.show_output_button)
 
         separator_output = QLabel("|")
@@ -592,7 +593,6 @@ class MainWindow(QMainWindow):
         self.output_dock.clear_requested.connect(self.clear_output)
 
     def toggle_console(self):
-        print("toggle_console called")
         if self.output_dock.isVisible():
             self.output_dock.hide()
             self.centralWidget().show()
