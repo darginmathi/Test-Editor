@@ -32,7 +32,7 @@ jobs:
       run: uv pip install pyinstaller
 
     - name: Build executable
-      run: uv run pyinstaller --onefile --noconsole --name "Test Editor" --icon="resources/testeditor_logo.ico" --add-data "resources;resources" main.py
+      run: uv run pyinstaller --onefile --noconsole --name "TestEditor" --icon="resources/testeditor_logo.ico" --add-data "resources;resources" main.py
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
