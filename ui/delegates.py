@@ -12,9 +12,10 @@ class ComboBoxDelegate(QStyledItemDelegate):
         super().__init__(parent)
         self.parent_tab = parent
         self.undo_stack = undo_stack
-        self.commands = commands
+        self.commands = set(commands)
         self.colors = colors
         self.cached_objects = []  # Cache for objects
+        self.cached_objects_set = set()
         self.objects_dirty = True
         self.duplicate_names_cache = set()
         self.duplicate_names_dirty = True
@@ -185,7 +186,7 @@ class ComboBoxDelegate(QStyledItemDelegate):
             self.undo_stack.push(command)
 
     def update_command_list(self, new_commands):
-        self.commands = new_commands
+        self.commands = set(new_commands)
 
     def invalidate_objects_cache(self):
         self.objects_dirty = True
@@ -199,8 +200,10 @@ class ComboBoxDelegate(QStyledItemDelegate):
             if obj_repo_model and not obj_repo_model.df.empty:
                 self.cached_objects = obj_repo_model.df.iloc[:, ObjRepoModel.NAME_COL].dropna().astype(str).unique().tolist()
                 self.cached_objects.sort()
+                self.cached_objects_set = set(self.cached_objects)
             else:
                 self.cached_objects = []
+                self.cached_objects_set = set()
             self.objects_dirty = False
         return self.cached_objects
 
@@ -256,8 +259,9 @@ class ComboBoxDelegate(QStyledItemDelegate):
                             final_color = QColor("#E57373")
 
                     elif TestScenarioModel.DATA1_COL <= current_col <= TestScenarioModel.DATA5_COL:
-                        objects = self._get_objects()
-                        if value not in objects:
+                        if self.objects_dirty:
+                            self._get_objects()
+                        if value not in self.cached_objects_set:
                             final_color = QColor("#64B5F6")
             elif isinstance(model, ObjRepoModel):
                 if current_col == ObjRepoModel.NAME_COL:
