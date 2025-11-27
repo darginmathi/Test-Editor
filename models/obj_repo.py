@@ -2,7 +2,7 @@ import pandas as pd
 from .model import TableModel
 
 from PyQt6.QtCore import QModelIndex, Qt
-from typing import Optional
+from typing import Optional, Any
 
 class ObjRepoModel(TableModel):
 
@@ -50,6 +50,25 @@ class ObjRepoModel(TableModel):
                     break
         return result
 
+    def headerData(self, section: int, orientation: Qt.Orientation, role: int = Qt.ItemDataRole.DisplayRole) -> Any:
+        if role == Qt.ItemDataRole.DisplayRole and orientation == Qt.Orientation.Vertical:
+            return str(section + 1)
+        return super().headerData(section, orientation, role)
+
+    def get_duplicate_names(self):
+        if self.df.empty:
+            return set()
+        # Ensure we're working with string types, and handle potential float NaNs
+        names = self.df.iloc[:, self.NAME_COL].astype(str)
+        # Filter out empty strings and 'END'
+        names = names[names.str.strip() != '']
+        names = names[names != 'END']
+        names = names[names != 'User friendly name of Object']
+        
+        # Find duplicates
+        duplicates = names[names.duplicated()].unique()
+        return set(duplicates)
+
     def insertRows(self, position, rows, parent=QModelIndex()):
         success = super().insertRows(position, rows, parent)
         if success:
@@ -61,7 +80,7 @@ class ObjRepoModel(TableModel):
                     if row_index < len(self.df):
                         self.df.iat[row_index, self.XPATH_COL] = "XPATH"
                         self.dataChanged.emit(xpath_index, xpath_index, [Qt.ItemDataRole.EditRole])
-                self.layoutChangedSignal.emit()
+                self.layoutChanged.emit()
             except Exception as e:
                     print(f"Error setting type or updating IDs after insert: {e}")
                     return False

@@ -30,7 +30,7 @@ class TabWidget(QWidget):
         self.delegate = ComboBoxDelegate(self, self.undo_stack, commands, colors)
 
         self.table1 = Table(model=self.model1, undo_stack=self.undo_stack, delegate=self.delegate, parent_tab=self)
-        self.table2 = Table(model=self.model2, undo_stack=self.undo_stack, delegate=self.delegate)
+        self.table2 = Table(model=self.model2, undo_stack=self.undo_stack, delegate=self.delegate, show_vertical_header=True)
 
         self.controller = TableController(main, self.undo_stack)
 
@@ -128,6 +128,7 @@ class TabWidget(QWidget):
 
     def on_object_model_changed(self):
         self.delegate.invalidate_objects_cache()
+        self.delegate.invalidate_duplicate_names_cache()
 
     def is_object_in_repository(self, object_name):
         if not object_name:

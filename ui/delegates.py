@@ -16,6 +16,8 @@ class ComboBoxDelegate(QStyledItemDelegate):
         self.colors = colors
         self.cached_objects = []  # Cache for objects
         self.objects_dirty = True
+        self.duplicate_names_cache = set()
+        self.duplicate_names_dirty = True
 
         self.editor = None
         self.current_model = None
@@ -188,6 +190,9 @@ class ComboBoxDelegate(QStyledItemDelegate):
     def invalidate_objects_cache(self):
         self.objects_dirty = True
 
+    def invalidate_duplicate_names_cache(self):
+        self.duplicate_names_dirty = True
+
     def _get_objects(self):
         if self.objects_dirty:
             obj_repo_model = self.parent_tab.model2
@@ -198,6 +203,12 @@ class ComboBoxDelegate(QStyledItemDelegate):
                 self.cached_objects = []
             self.objects_dirty = False
         return self.cached_objects
+
+    def _get_duplicate_names(self, model):
+        if self.duplicate_names_dirty:
+            self.duplicate_names_cache = model.get_duplicate_names()
+            self.duplicate_names_dirty = False
+        return self.duplicate_names_cache
 
     def paint(self, painter, option, index):
         model = index.model()
@@ -235,18 +246,26 @@ class ComboBoxDelegate(QStyledItemDelegate):
 
         final_color = option.palette.color(QPalette.ColorRole.Text)
 
-        if not is_special_row and isinstance(model, TestScenarioModel):
-            value = index.data(Qt.ItemDataRole.DisplayRole)
+        if not is_special_row:
+            if isinstance(model, TestScenarioModel):
+                value = index.data(Qt.ItemDataRole.DisplayRole)
 
-            if value:
-                if current_col == TestScenarioModel.COMMAND_COL:
-                    if value not in self.commands:
-                        final_color = QColor("#E57373")
+                if value:
+                    if current_col == TestScenarioModel.COMMAND_COL:
+                        if value not in self.commands:
+                            final_color = QColor("#E57373")
 
-                elif TestScenarioModel.DATA1_COL <= current_col <= TestScenarioModel.DATA5_COL:
-                    objects = self._get_objects()
-                    if value not in objects:
-                        final_color = QColor("#64B5F6")
+                    elif TestScenarioModel.DATA1_COL <= current_col <= TestScenarioModel.DATA5_COL:
+                        objects = self._get_objects()
+                        if value not in objects:
+                            final_color = QColor("#64B5F6")
+            elif isinstance(model, ObjRepoModel):
+                if current_col == ObjRepoModel.NAME_COL:
+                    value = index.data(Qt.ItemDataRole.DisplayRole)
+                    if value:
+                        duplicate_names = self._get_duplicate_names(model)
+                        if value in duplicate_names:
+                            final_color = QColor("#E57373")
 
         option.palette.setColor(QPalette.ColorRole.Text, final_color)
         option.palette.setColor(QPalette.ColorRole.HighlightedText, final_color)

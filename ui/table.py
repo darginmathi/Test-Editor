@@ -13,12 +13,13 @@ class Table(QWidget):
     skipRequested = pyqtSignal(list)
     unskipRequested = pyqtSignal(list)
 
-    def __init__(self, model, undo_stack=None, delegate=None, parent_tab=None):
+    def __init__(self, model, undo_stack=None, delegate=None, parent_tab=None, show_vertical_header=False):
         super().__init__()
         self.model = model
         self.undo_stack = undo_stack
         self.delegate = delegate
         self.parent_tab = parent_tab
+        self.show_vertical_header = show_vertical_header
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -39,7 +40,8 @@ class Table(QWidget):
         v_header = self.table.verticalHeader()
         h_header.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         h_header.setMinimumHeight(20)
-        v_header.hide()
+        if not self.show_vertical_header:
+            v_header.hide()
         self.auto_adjust_cells()
         self.table.setWordWrap(True)
         self.table.setAlternatingRowColors(False)
