@@ -2,6 +2,7 @@ from PyQt6.QtCore import QObject, QProcess, pyqtSignal, QProcessEnvironment
 from models.run_config import RunConfig
 import os
 import subprocess
+from subprocess import DEVNULL
 
 # MAVEN_EXECUTABLE_PATH = "C:\\Users\\meetd\\Downloads\\apache-maven-3.9.10-bin\\apache-maven-3.9.10\\bin\\mvn.cmd"
 MAVEN_EXECUTABLE_PATH = "mvn"
@@ -81,7 +82,7 @@ class TestRunner(QObject):
         pid = self.process.processId()
 
         if pid:
-            subprocess.run(f"taskkill /F /T /PID {pid}", capture_output=True, text=True)
+            subprocess.Popen(f"taskkill /F /T /PID {pid}", shell=True, stdout=DEVNULL)
 
     def _on_stdout(self):
         if self.process:
@@ -105,7 +106,7 @@ class TestRunner(QObject):
         if self.process:
             pid = self.process.processId()
             if pid:
-                subprocess.run(f"taskkill /F /T /PID {pid}", capture_output=True, text=True)
+                subprocess.Popen(f"taskkill /F /T /PID {pid}", shell=True, stdout=DEVNULL)
 
             try:
                 self.process.readyReadStandardOutput.disconnect()

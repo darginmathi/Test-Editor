@@ -5,8 +5,6 @@ __pycache__/
 *.pyc
 .env
 
-GEMINI.md
-.gemini/
 .ruff_cache/
 
 build/
