@@ -92,12 +92,12 @@ class Table(QWidget):
         if isinstance(self.model, TestScenarioModel):
             mark_skip_action = QAction("Mark Skip", self)
             mark_skip_action.triggered.connect(self.skip)
-            mark_skip_action.setShortcut("Ctrl+R")
+            mark_skip_action.setShortcut("Ctrl+T")
             menu.addAction(mark_skip_action)
 
             mark_unskip_action = QAction("Mark Unskip", self)
             mark_unskip_action.triggered.connect(self.unskip)
-            mark_unskip_action.setShortcut("Ctrl+T")
+            mark_unskip_action.setShortcut("Ctrl+Shift+T")
             menu.addAction(mark_unskip_action)
 
             menu.addSeparator()

@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import (QDockWidget, QTabWidget,  QTextEdit, QTabBar, QVBoxLayout, QWidget,
                              QHBoxLayout, QPushButton)
 from PyQt6.QtCore import Qt, pyqtSignal, QUrl
+from PyQt6.QtGui import QShortcut, QKeySequence
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWebEngineCore import QWebEnginePage
 from PyQt6.QtWidgets import QStyle
@@ -88,6 +89,9 @@ class OutputDock(QDockWidget):
         self.minimize_button.clicked.connect(self.toggle_visibility_requested.emit)
         self.maximize_button.clicked.connect(self.toggle_maximize)
         self.refresh_button.clicked.connect(self.refresh_current_view)
+
+        self.refresh_shortcut = QShortcut(QKeySequence(Qt.Key.Key_F5), self)
+        self.refresh_shortcut.activated.connect(self.refresh_current_view)
 
         container = QWidget()
         layout = QVBoxLayout(container)

@@ -37,4 +37,5 @@ PROJECT_URLS = {
     "uatmaqa": "https://uatmaqa.synoption.com/#/auth/login",
     "qaocbctitan": "https://qaocbctitan.synoption.com/#/auth/login",
     "uatocbctitan": "https://uatocbctitan.synoption.com/#/auth/login",
+    "uatoptimusv2": "https://uatoptimusv2.synoption.com/#/auth/login",
 }
