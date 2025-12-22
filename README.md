@@ -1,5 +1,7 @@
 # Test Case Editor
 
+## Moving to .csv format and new edit menu to accomodate global Object Repo
+
 A user-friendly desktop application to edit test cases for keyword-driven testing frameworks like Selenium. No programming knowledge required!
 
 ![Test Case Editor Application](test_editor-sample-workspace.png)
