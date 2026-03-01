@@ -1,5 +1,9 @@
 # Test Case Editor
 
+## [DEPRECATED] 
+
+- Decided to rewrite the framework in playwright instead of using bandaid fixes to support improperly written/maintained framework.
+
 ## Moving to .csv format and new edit menu to accomodate global Object Repo
 
 A user-friendly desktop application to edit test cases for keyword-driven testing frameworks like Selenium. No programming knowledge required!
